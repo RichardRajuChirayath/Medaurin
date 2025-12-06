@@ -1,0 +1,49 @@
+﻿node.exe : 
+unhandledRejection Error: 
+Cannot find module 
+'./loaders'
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (unhan  
+  dledReject...ule './loa   
+ ders':String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+Require stack:
+- D:\mix-safe-medicine-check
+er\node_modules\next\dist\bu
+ild\webpack\config\blocks\cs
+s\index.js
+- D:\mix-safe-medicine-check
+er\node_modules\next\dist\bu
+ild\webpack\config\index.js
+- D:\mix-safe-medicine-check
+er\node_modules\next\dist\bu
+ild\webpack-config.js
+- D:\mix-safe-medicine-check
+er\node_modules\next\dist\bu
+ild\webpack\plugins\next-tra
+ce-entrypoints-plugin.js
+- D:\mix-safe-medicine-check
+er\node_modules\next\dist\bu
+ild\collect-build-traces.js
+- D:\mix-safe-medicine-check
+er\node_modules\next\dist\bu
+ild\index.js
+- D:\mix-safe-medicine-check
+er\node_modules\next\dist\cl
+i\next-build.js
+    at ignore-listed frames 
+{
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
