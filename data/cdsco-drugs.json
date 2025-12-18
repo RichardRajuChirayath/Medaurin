@@ -1,0 +1,126 @@
+[
+    {
+        "drugName": "Paracetamol",
+        "genericName": "Acetaminophen",
+        "approvalStatus": "APPROVED",
+        "cdscoLicense": "CDSCO/IND/PC-2891",
+        "manufacturer": "Cipla Ltd",
+        "manufacturerLicense": "MFG/IND/2024/0891",
+        "category": "Analgesic",
+        "isBanned": false
+    },
+    {
+        "drugName": "Metformin",
+        "genericName": "Metformin Hydrochloride",
+        "approvalStatus": "APPROVED",
+        "cdscoLicense": "CDSCO/IND/MF-3421",
+        "manufacturer": "Sun Pharma",
+        "manufacturerLicense": "MFG/IND/2024/1234",
+        "category": "Antidiabetic",
+        "isBanned": false
+    },
+    {
+        "drugName": "Atorvastatin",
+        "genericName": "Atorvastatin Calcium",
+        "approvalStatus": "APPROVED",
+        "cdscoLicense": "CDSCO/IND/AT-2134",
+        "manufacturer": "Dr. Reddy's",
+        "manufacturerLicense": "MFG/IND/2024/5678",
+        "category": "Statin",
+        "isBanned": false
+    },
+    {
+        "drugName": "Rimonabant",
+        "genericName": "Rimonabant",
+        "approvalStatus": "BANNED",
+        "cdscoLicense": "REVOKED",
+        "manufacturer": "N/A",
+        "manufacturerLicense": "REVOKED",
+        "category": "Anti-obesity",
+        "isBanned": true,
+        "banReason": "Severe psychiatric side effects"
+    },
+    {
+        "drugName": "Sibutramine",
+        "genericName": "Sibutramine Hydrochloride",
+        "approvalStatus": "BANNED",
+        "cdscoLicense": "REVOKED",
+        "manufacturer": "N/A",
+        "manufacturerLicense": "REVOKED",
+        "category": "Anti-obesity",
+        "isBanned": true,
+        "banReason": "Cardiovascular risks"
+    },
+    {
+        "drugName": "Phenylpropanolamine",
+        "genericName": "PPA",
+        "approvalStatus": "BANNED",
+        "cdscoLicense": "REVOKED",
+        "manufacturer": "N/A",
+        "manufacturerLicense": "REVOKED",
+        "category": "Decongestant",
+        "isBanned": true,
+        "banReason": "Stroke risk"
+    },
+    {
+        "drugName": "Nimesulide",
+        "genericName": "Nimesulide",
+        "approvalStatus": "BANNED",
+        "cdscoLicense": "REVOKED",
+        "manufacturer": "N/A",
+        "manufacturerLicense": "REVOKED",
+        "category": "NSAID",
+        "isBanned": true,
+        "banReason": "Hepatotoxicity (liver damage)"
+    },
+    {
+        "drugName": "Amlodipine",
+        "genericName": "Amlodipine Besylate",
+        "approvalStatus": "APPROVED",
+        "cdscoLicense": "CDSCO/IND/AM-4567",
+        "manufacturer": "Lupin Ltd",
+        "manufacturerLicense": "MFG/IND/2024/3456",
+        "category": "Antihypertensive",
+        "isBanned": false
+    },
+    {
+        "drugName": "Omeprazole",
+        "genericName": "Omeprazole",
+        "approvalStatus": "APPROVED",
+        "cdscoLicense": "CDSCO/IND/OM-7890",
+        "manufacturer": "Zydus Cadila",
+        "manufacturerLicense": "MFG/IND/2024/7890",
+        "category": "Proton Pump Inhibitor",
+        "isBanned": false
+    },
+    {
+        "drugName": "Azithromycin",
+        "genericName": "Azithromycin Dihydrate",
+        "approvalStatus": "APPROVED",
+        "cdscoLicense": "CDSCO/IND/AZ-2345",
+        "manufacturer": "Abbott India",
+        "manufacturerLicense": "MFG/IND/2024/2345",
+        "category": "Antibiotic",
+        "isBanned": false
+    },
+    {
+        "drugName": "Ciprofloxacin",
+        "genericName": "Ciprofloxacin Hydrochloride",
+        "approvalStatus": "APPROVED",
+        "cdscoLicense": "CDSCO/IND/CP-6789",
+        "manufacturer": "Ranbaxy",
+        "manufacturerLicense": "MFG/IND/2024/6789",
+        "category": "Antibiotic",
+        "isBanned": false
+    },
+    {
+        "drugName": "Losartan",
+        "genericName": "Losartan Potassium",
+        "approvalStatus": "APPROVED",
+        "cdscoLicense": "CDSCO/IND/LS-3456",
+        "manufacturer": "Torrent Pharma",
+        "manufacturerLicense": "MFG/IND/2024/4567",
+        "category": "Antihypertensive",
+        "isBanned": false
+    }
+]

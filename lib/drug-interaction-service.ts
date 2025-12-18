@@ -7,6 +7,8 @@ import {
     getRxNormCacheKey,
     getInteractionCacheKey
 } from "./cache"
+import { resolveGenericName } from "./generic-resolver"
+import { resolveIndianBrand } from "./brand-mapper"
 
 interface RxNormConcept {
     rxcui: string
@@ -26,6 +28,29 @@ interface NormalizedDrug {
     rxcui: string | null
     normalizedName: string
     synonyms: string[]
+    apiError?: boolean
+}
+
+/**
+ * Fetch with retry logic (3 attempts, 200ms delay)
+ */
+async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url)
+            if (response.ok) return response
+
+            if (response.status === 429 || response.status >= 500) {
+                await new Promise(r => setTimeout(r, 200))
+                continue
+            }
+            return response
+        } catch (error) {
+            if (i === retries - 1) throw error
+            await new Promise(r => setTimeout(r, 200))
+        }
+    }
+    throw new Error(`Failed to fetch ${url}`)
 }
 
 /**
@@ -82,7 +107,29 @@ function calculateSimilarity(str1: string, str2: string): number {
  * Returns the RxCUI (unique identifier) and standardized name
  */
 export async function normalizeDrugName(drugName: string): Promise<NormalizedDrug> {
-    const cacheKey = getRxNormCacheKey(drugName)
+    // 1. Strict Normalization (Pipeline)
+    const normalizedInput = drugName
+        .toLowerCase()
+        .replace(/[^\w\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+
+    // 2. Check Indian Brand Mapper (Pre-validation)
+    // This handles Dolo, Crocin, etc. by mapping to "acetaminophen" or similar
+    const indianBrand = resolveIndianBrand(normalizedInput)
+    let validationQuery = normalizedInput
+
+    if (indianBrand) {
+        console.log(`[Interaction] 🇮🇳 Indian Brand Detected: "${normalizedInput}" -> "${indianBrand.genericNames[0]}"`)
+        validationQuery = indianBrand.genericNames[0].toLowerCase()
+    }
+
+    // 3. Resolve Generics (e.g. Paracetamol -> Acetaminophen)
+    const resolvedGeneric = await resolveGenericName(validationQuery)
+    const finalQuery = resolvedGeneric || validationQuery
+
+    // Check persistent cache first using the FINAL query
+    const cacheKey = getRxNormCacheKey(finalQuery)
 
     // Check persistent cache first
     const cachedData = await rxNormCache.get(cacheKey)
@@ -91,17 +138,17 @@ export async function normalizeDrugName(drugName: string): Promise<NormalizedDru
         return {
             originalName: drugName,
             rxcui: cachedData.rxcui || null,
-            normalizedName: cachedData.name || drugName,
+            normalizedName: cachedData.name || finalQuery,
             synonyms: cachedData.synonyms || []
         }
     }
 
     try {
-        console.log(`[RxNorm] Cache MISS for ${drugName}, fetching from API...`)
+        console.log(`[RxNorm] Cache MISS for ${finalQuery}, fetching from API...`)
 
         // RxNorm approximateTerm API for fuzzy matching
-        const response = await fetch(
-            `https://rxnav.nlm.nih.gov/REST/approximateTerm.json?term=${encodeURIComponent(drugName)}&maxEntries=1`
+        const response = await fetchWithRetry(
+            `https://rxnav.nlm.nih.gov/REST/approximateTerm.json?term=${encodeURIComponent(finalQuery)}&maxEntries=1`
         )
 
         if (!response.ok) {
@@ -127,18 +174,18 @@ export async function normalizeDrugName(drugName: string): Promise<NormalizedDru
             }
 
             // STRICT SIMILARITY CHECK: Prevent false positives like "hi" -> "tolnaftate"
-            const similarity = calculateSimilarity(drugName.toLowerCase(), bestMatch.name.toLowerCase())
-            const minSimilarity = 0.5
+            const similarity = calculateSimilarity(finalQuery, bestMatch.name.toLowerCase())
+            const minSimilarity = 0.9
 
-            console.log(`[RxNorm] Match found: "${drugName}" -> "${bestMatch.name}" (similarity: ${(similarity * 100).toFixed(1)}%)`)
+            console.log(`[RxNorm] Match found: "${finalQuery}" -> "${bestMatch.name}" (similarity: ${(similarity * 100).toFixed(1)}%)`)
 
             if (similarity < minSimilarity) {
                 console.log(`[RxNorm] ❌ REJECTED: Similarity ${(similarity * 100).toFixed(1)}% is below threshold ${(minSimilarity * 100)}%`)
-                await rxNormCache.set(cacheKey, { rxcui: null, name: drugName, synonyms: [] })
+                await rxNormCache.set(cacheKey, { rxcui: null, name: finalQuery, synonyms: [] })
                 return {
                     originalName: drugName,
                     rxcui: null,
-                    normalizedName: drugName,
+                    normalizedName: finalQuery,
                     synonyms: []
                 }
             }
@@ -150,7 +197,7 @@ export async function normalizeDrugName(drugName: string): Promise<NormalizedDru
             const result: NormalizedDrug = {
                 originalName: drugName,
                 rxcui: bestMatch.rxcui,
-                normalizedName: bestMatch.name || drugName,
+                normalizedName: bestMatch.name || finalQuery,
                 synonyms
             }
 
@@ -163,16 +210,23 @@ export async function normalizeDrugName(drugName: string): Promise<NormalizedDru
             return result
         }
     } catch (error) {
-        console.error(`RxNorm lookup failed for ${drugName}:`, error)
+        console.error(`RxNorm lookup failed for ${finalQuery}:`, error)
+        return {
+            originalName: drugName,
+            rxcui: null,
+            normalizedName: finalQuery,
+            synonyms: [],
+            apiError: true
+        }
     }
 
     // Cache the miss too to avoid repeated lookups
-    await rxNormCache.set(cacheKey, { rxcui: null, name: drugName, synonyms: [] })
+    await rxNormCache.set(cacheKey, { rxcui: null, name: finalQuery, synonyms: [] })
 
     return {
         originalName: drugName,
         rxcui: null,
-        normalizedName: drugName,
+        normalizedName: finalQuery,
         synonyms: []
     }
 }
@@ -230,7 +284,7 @@ export async function getDrugInteractionsFromNIH(rxcuis: string[]): Promise<Drug
 
         // NIH Drug Interaction API endpoint
         const rxcuiList = rxcuis.filter(Boolean).join("+")
-        const response = await fetch(
+        const response = await fetchWithRetry(
             `https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=${rxcuiList}`
         )
 
@@ -358,6 +412,40 @@ export async function getDrugClass(rxcui: string): Promise<string[]> {
 
         return classInfo.map((c: any) => c.rxclassMinConceptItem?.className).filter(Boolean)
     } catch {
+        return []
+    }
+}
+
+/**
+ * Get disease contraindications via RxClass API (MEDRT)
+ * https://rxnav.nlm.nih.gov/REST/rxclass/class/byDrugName.json?drugName={name}&relaSource=MEDRT&relas=CI_with
+ * 
+ * Returns a list of diseases that are contraindicated with this drug.
+ */
+export async function getDiseaseContraindications(drugName: string): Promise<string[]> {
+    try {
+        // Use RxClass API to find diseases linked via "CI_with" (Contraindicated With)
+        const response = await fetchWithRetry(
+            `https://rxnav.nlm.nih.gov/REST/rxclass/class/byDrugName.json?drugName=${encodeURIComponent(drugName)}&relaSource=MEDRT&relas=CI_with`
+        )
+
+        if (!response.ok) return []
+
+        const data = await response.json()
+        const infoList = data?.rxclassDrugInfoList?.rxclassDrugInfo || []
+
+        const diseases: string[] = []
+        for (const info of infoList) {
+            // Filter strictly for DISEASE class types to avoid noise
+            if (info.rxclassMinConceptItem?.classType === "DISEASE") {
+                diseases.push(info.rxclassMinConceptItem.className)
+            }
+        }
+
+        // Dedup
+        return Array.from(new Set(diseases))
+    } catch (error) {
+        console.error(`RxClass API error for ${drugName}:`, error)
         return []
     }
 }

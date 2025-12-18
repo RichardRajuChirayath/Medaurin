@@ -45,7 +45,7 @@ export function TypingAnimation({ words, className = "" }: TypingAnimationProps)
         }, isPaused ? 2000 : isDeleting ? 50 : 100) // Pause: 2s, Delete: 50ms, Type: 100ms
 
         return () => clearTimeout(timeout)
-    }, [currentText, currentWordIndex, isDeleting, isPaused, words])
+    }, [currentText, currentWordIndex, isDeleting, isPaused, words.join(",")])
 
     return (
         <span className={className}>

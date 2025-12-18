@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
 import { Pill, Plus, Clock, Calendar, CheckCircle2, AlertCircle, TrendingUp, Bell, ChevronLeft, BellOff } from "lucide-react"
 import { useNotifications } from "@/hooks/use-notifications"
+import { WeatherHealthShield } from "@/components/weather-health-shield"
 
 interface Medication {
     id: string
@@ -28,7 +29,7 @@ interface DosageLog {
 }
 
 export default function MedicationsPage() {
-    const { data: session, status } = useSession()
+    const { user, loading } = useAuth()
     const router = useRouter()
     const { permission, requestPermission, scheduleMultipleNotifications } = useNotifications()
 
@@ -39,16 +40,16 @@ export default function MedicationsPage() {
     const [todaySchedule, setTodaySchedule] = useState<any[]>([])
 
     useEffect(() => {
-        if (status === "unauthenticated") {
+        if (!loading && !user) {
             router.push("/")
             return
         }
 
-        if (status === "authenticated") {
+        if (user) {
             fetchMedications()
             fetchDosageLogs()
         }
-    }, [status, router])
+    }, [user, loading, router])
 
     // Setup notifications when medications change
     useEffect(() => {
@@ -212,8 +213,8 @@ export default function MedicationsPage() {
                     <button
                         onClick={requestPermission}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${permission === "granted"
-                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-default"
-                                : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-default"
+                            : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
                             }`}
                     >
                         {permission === "granted" ? (
@@ -267,6 +268,11 @@ export default function MedicationsPage() {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Weather Health Shield - New Feature */}
+                <div className="mb-8">
+                    <WeatherHealthShield />
                 </div>
 
                 {/* Today's Schedule */}
@@ -410,13 +416,19 @@ function AddMedicationModal({ onClose, onSuccess }: { onClose: () => void; onSuc
     const [medicineName, setMedicineName] = useState("")
     const [dosage, setDosage] = useState("")
     const [frequency, setFrequency] = useState("")
-    const [reminderTimes, setReminderTimes] = useState<string[]>([])
+    const [reminderTimesString, setReminderTimesString] = useState("")
     const [notes, setNotes] = useState("")
     const [isSaving, setIsSaving] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsSaving(true)
+
+        // Parse reminder times
+        const reminderTimes = reminderTimesString
+            .split(",")
+            .map(t => t.trim())
+            .filter(t => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(t)); // Basic HH:MM validation
 
         try {
             const res = await fetch("/api/medications", {
@@ -434,6 +446,10 @@ function AddMedicationModal({ onClose, onSuccess }: { onClose: () => void; onSuc
 
             if (res.ok) {
                 onSuccess()
+            } else {
+                const data = await res.json()
+                console.error("Failed to add:", data)
+                // Optionally show toast error here
             }
         } catch (error) {
             console.error("Error adding medication:", error)
@@ -499,15 +515,16 @@ function AddMedicationModal({ onClose, onSuccess }: { onClose: () => void; onSuc
 
                     <div>
                         <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Reminder Times (comma separated)
+                            Reminder Times (24h format HH:MM, comma separated)
                         </label>
                         <input
                             type="text"
-                            value={reminderTimes.join(", ")}
-                            onChange={(e) => setReminderTimes(e.target.value.split(",").map(t => t.trim()).filter(Boolean))}
+                            value={reminderTimesString}
+                            onChange={(e) => setReminderTimesString(e.target.value)}
                             className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
                             placeholder="e.g., 09:00, 21:00"
                         />
+                        <p className="text-xs text-slate-500 mt-1">Example: 08:30, 20:30</p>
                     </div>
 
                     <div>

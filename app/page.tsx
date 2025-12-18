@@ -12,6 +12,7 @@ import { VoiceInput } from "@/components/voice-input"
 import { WelcomeModal } from "@/components/welcome-modal"
 import { TypingAnimation } from "@/components/typing-animation"
 import { Sparkles, Shield, Zap, Moon, Sun, Activity, Brain, Database } from "lucide-react"
+import { toast } from "sonner"
 
 interface AnalysisResult {
   status: "safe" | "caution" | "danger" | "unknown"
@@ -25,6 +26,7 @@ interface AnalysisResult {
     description: string
   }>
   recommendations: string[]
+  unknownMedicines?: string[]
 }
 
 export default function Home() {
@@ -77,24 +79,32 @@ export default function Home() {
       }
 
       const ocrData = await ocrResponse.json()
-      const medicines = ocrData.medicines
 
-      if (!medicines || medicines.length === 0) {
-        throw new Error("No medicines detected in image. Please upload a clear photo.")
+      // Safety Check: Handle "Success: false" (Empty text or No meds)
+      if (!ocrData.success) {
+        console.warn(`[OCR] Analysis incomplete: ${ocrData.reason}`)
+
+        // Show user-friendly toast instead of red error banner
+        toast(ocrData.reason === "NO_VALID_MEDICINES" ? "Medicines not found" : "No text detected", {
+          description: ocrData.message,
+          icon: <span className="text-xl">⚠️</span>,
+          style: { background: '#FEF3C7', color: '#92400E', border: '1px solid #F59E0B' } // Warning Amber style
+        })
+
+        // Stop here, but don't throw error (prevents red banner)
+        return
       }
 
-      const drugDataResponse = await fetch("/api/getDrugData", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ medicines }),
-      })
+      const medicines = ocrData.medicines || []
+      const drugData = ocrData.drugData || []
 
-      if (!drugDataResponse.ok) {
-        throw new Error("Failed to fetch drug data")
+      // Double check just in case
+      if (medicines.length === 0) {
+        toast.error("Analysis Failed", { description: "No medicines identified." })
+        return
       }
 
-      const drugData = await drugDataResponse.json()
-
+      // Use pre-validated drug data directly from OCR response (efficient)
       const analysisResponse = await fetch("/api/analyzeMix", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -114,18 +124,6 @@ export default function Home() {
       }
 
       const analysisResult = await analysisResponse.json()
-      console.log("Analysis Result from API:", analysisResult)
-      console.log("Medicine Details:", analysisResult.medicineDetails)
-      if (analysisResult.medicineDetails && analysisResult.medicineDetails.length > 0) {
-        analysisResult.medicineDetails.forEach((med: any, idx: number) => {
-          console.log(`Medicine ${idx + 1} (${med.name}):`, {
-            hasSideEffects: !!med.sideEffects,
-            sideEffectsCount: med.sideEffects?.length || 0,
-            sideEffects: med.sideEffects
-          })
-        })
-      }
-      setResult({ ...analysisResult, analysisType: "photo" })
 
       // Save to database
       fetch("/api/history", {
@@ -140,7 +138,14 @@ export default function Home() {
           recommendations: analysisResult.recommendations,
         }),
       }).catch(err => console.error("Failed to save:", err))
+
+      setResult({
+        ...analysisResult,
+        analysisType: "photo"
+      })
+
     } catch (err) {
+      console.error(err)
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
       setLoading(false)
@@ -173,7 +178,18 @@ export default function Home() {
       })
 
       if (!drugDataResponse.ok) {
-        throw new Error("Failed to fetch drug data")
+        const errorData = await drugDataResponse.json().catch(() => ({}))
+        const errorMessage = errorData.error || errorData.message || "Failed to fetch drug data";
+
+        // If we have specific invalid medicines details, format them nicely
+        if (errorData.invalidMedicines && Array.isArray(errorData.invalidMedicines)) {
+          const details = errorData.invalidMedicines
+            .map((m: any) => `${m.name}: ${m.reason}`)
+            .join("\n");
+          throw new Error(`${errorMessage}\n\n${details}`);
+        }
+
+        throw new Error(errorMessage)
       }
 
       const drugData = await drugDataResponse.json()
@@ -234,20 +250,20 @@ export default function Home() {
         {/* ULTRA-ADVANCED ANIMATED BACKGROUND - WOW FACTOR */}
         <div className="fixed inset-0 -z-10">
           {/* Layer 1: Premium Base Gradient with Color Grading */}
-          <div className="absolute inset-0 bg-gradient-to-br from-sky-100 via-indigo-100 to-purple-100 dark:from-slate-950 dark:via-indigo-950/90 dark:to-purple-950/80" />
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-indigo-950/90 dark:to-purple-950/80" />
 
           {/* Layer 2: Animated Mesh Gradient Overlay */}
-          <div className="absolute inset-0 opacity-60 dark:opacity-40">
+          <div className="absolute inset-0 opacity-20 dark:opacity-40">
             <div className="absolute inset-0 bg-gradient-to-tr from-cyan-300/40 via-blue-400/30 to-transparent animate-gradient-shift" />
             <div className="absolute inset-0 bg-gradient-to-bl from-purple-400/40 via-pink-400/30 to-transparent animate-gradient-shift-reverse" />
             <div className="absolute inset-0 bg-gradient-to-tl from-indigo-400/30 via-violet-400/25 to-transparent animate-gradient-pulse" />
           </div>
 
           {/* Layer 3: Large Floating Orbs with Advanced Blur */}
-          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gradient-to-br from-cyan-400/40 to-blue-500/30 dark:from-cyan-600/25 dark:to-blue-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[100px] animate-float-slow" />
-          <div className="absolute top-1/4 -right-40 w-[700px] h-[700px] bg-gradient-to-br from-purple-400/40 to-pink-500/30 dark:from-purple-600/25 dark:to-pink-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[120px] animate-float-slow" style={{ animationDelay: '3s', animationDuration: '25s' }} />
-          <div className="absolute -bottom-40 left-1/3 w-[650px] h-[650px] bg-gradient-to-br from-indigo-400/40 to-violet-500/30 dark:from-indigo-600/25 dark:to-violet-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[110px] animate-float-slow" style={{ animationDelay: '6s', animationDuration: '30s' }} />
-          <div className="absolute top-2/3 right-1/4 w-[550px] h-[550px] bg-gradient-to-br from-rose-400/35 to-orange-500/25 dark:from-rose-600/20 dark:to-orange-700/15 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[90px] animate-float-slow" style={{ animationDelay: '9s', animationDuration: '28s' }} />
+          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gradient-to-br from-cyan-400/20 to-blue-500/10 dark:from-cyan-600/25 dark:to-blue-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[100px] animate-float-slow" />
+          <div className="absolute top-1/4 -right-40 w-[700px] h-[700px] bg-gradient-to-br from-purple-400/20 to-pink-500/10 dark:from-purple-600/25 dark:to-pink-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[120px] animate-float-slow" style={{ animationDelay: '3s', animationDuration: '25s' }} />
+          <div className="absolute -bottom-40 left-1/3 w-[650px] h-[650px] bg-gradient-to-br from-indigo-400/20 to-violet-500/10 dark:from-indigo-600/25 dark:to-violet-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[110px] animate-float-slow" style={{ animationDelay: '6s', animationDuration: '30s' }} />
+          <div className="absolute top-2/3 right-1/4 w-[550px] h-[550px] bg-gradient-to-br from-rose-400/15 to-orange-500/10 dark:from-rose-600/20 dark:to-orange-700/15 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[90px] animate-float-slow" style={{ animationDelay: '9s', animationDuration: '28s' }} />
 
           {/* Layer 4: Medium Floating Particles */}
           <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-gradient-to-br from-blue-300/50 to-cyan-400/40 dark:from-blue-500/30 dark:to-cyan-600/25 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[60px] animate-float-bubble" />
@@ -314,7 +330,7 @@ export default function Home() {
                 {/* Brand Text */}
                 <div className="flex flex-col">
                   <h1 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-sm">
-                    MixSafe
+                    Medaurin
                   </h1>
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-bold text-slate-600 dark:text-slate-400 tracking-wide">
@@ -375,24 +391,24 @@ export default function Home() {
                 </div>
 
                 {/* Main Heading */}
-                <h2 className="text-6xl md:text-7xl font-black text-slate-900 dark:text-white leading-tight tracking-tight drop-shadow-sm">
+                <h2 className="text-6xl md:text-7xl font-heading font-black text-foreground leading-tight tracking-tight drop-shadow-sm">
                   Check If Your Medicines
                   <br />
-                  <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent inline-block filter drop-shadow-sm">
+                  <span className="text-gradient-primary inline-block filter drop-shadow-sm">
                     <TypingAnimation
                       words={["Aspirin", "Metformin", "Ibuprofen", "Dolo", "Crocin", "Paracetamol"]}
                     />
                   </span>
                   <br />
-                  <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent inline-block filter drop-shadow-sm">
+                  <span className="text-gradient-primary inline-block filter drop-shadow-sm">
                     Are Safe Together
                   </span>
                 </h2>
 
                 {/* Subheading */}
-                <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed font-medium text-fade-in">
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-medium text-fade-in">
                   Upload a photo of your medicines to get instant safety analysis using FDA, RxNorm & NIH databases.
-                  Our AI analyzes potential interactions in <span className="font-bold text-indigo-600 dark:text-indigo-400">seconds</span>.
+                  Our AI analyzes potential interactions in <span className="font-bold text-primary">seconds</span>.
                 </p>
 
                 {/* Feature Cards */}
@@ -430,7 +446,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-black text-red-900 dark:text-red-300 mb-2 text-lg">Error Occurred</h4>
-                      <p className="text-red-700 dark:text-red-400 font-medium">{error}</p>
+                      <p className="text-red-700 dark:text-red-400 font-medium whitespace-pre-wrap">{error}</p>
                     </div>
                   </div>
                 </div>
@@ -544,7 +560,7 @@ export default function Home() {
                 <span>Always consult a healthcare provider.</span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-500 font-semibold tracking-wide">
-                © 2024 MixSafe. Built with Next.js, TypeScript, and AI. All rights reserved.
+                Built with ❤️ in INDIA.
               </p>
             </div>
           </div>
@@ -566,7 +582,7 @@ interface FeatureCardProps {
 function FeatureCard({ icon: Icon, title, description, gradient, delay }: FeatureCardProps) {
   return (
     <div
-      className="group p-8 rounded-3xl bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 hover:border-indigo-300 dark:hover:border-indigo-700 animate-scale-in flex flex-col items-center text-center"
+      className="group p-8 rounded-3xl glass-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 hover:border-primary/50 animate-scale-in flex flex-col items-center text-center"
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="relative mb-6 group-hover:scale-110 transition-transform duration-500">
@@ -581,8 +597,8 @@ function FeatureCard({ icon: Icon, title, description, gradient, delay }: Featur
           <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         </div>
       </div>
-      <h3 className="font-black text-slate-900 dark:text-white mb-3 text-xl tracking-tight">{title}</h3>
-      <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{description}</p>
+      <h3 className="font-heading font-black text-foreground mb-3 text-xl tracking-tight">{title}</h3>
+      <p className="text-base text-muted-foreground leading-relaxed font-medium">{description}</p>
     </div>
   )
 }

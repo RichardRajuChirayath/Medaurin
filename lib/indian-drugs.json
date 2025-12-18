@@ -1,0 +1,487 @@
+[
+    {
+        "brand": "Dolo",
+        "generics": [
+            "Acetaminophen"
+        ]
+    },
+    {
+        "brand": "Calpol",
+        "generics": [
+            "Acetaminophen"
+        ]
+    },
+    {
+        "brand": "Crocin",
+        "generics": [
+            "Acetaminophen"
+        ]
+    },
+    {
+        "brand": "Paracip",
+        "generics": [
+            "Acetaminophen"
+        ]
+    },
+    {
+        "brand": "T98",
+        "generics": [
+            "Acetaminophen"
+        ]
+    },
+    {
+        "brand": "Sumo",
+        "generics": [
+            "Nimesulide",
+            "Acetaminophen"
+        ]
+    },
+    {
+        "brand": "Combiflam",
+        "generics": [
+            "Ibuprofen",
+            "Acetaminophen"
+        ]
+    },
+    {
+        "brand": "Saridon",
+        "generics": [
+            "Acetaminophen",
+            "Propyphenazone",
+            "Caffeine"
+        ]
+    },
+    {
+        "brand": "Disprin",
+        "generics": [
+            "Aspirin"
+        ]
+    },
+    {
+        "brand": "Augmentin",
+        "generics": [
+            "Amoxicillin",
+            "Clavulanic acid"
+        ]
+    },
+    {
+        "brand": "Moxikind-CV",
+        "generics": [
+            "Amoxicillin",
+            "Clavulanic acid"
+        ]
+    },
+    {
+        "brand": "Clavam",
+        "generics": [
+            "Amoxicillin",
+            "Clavulanic acid"
+        ]
+    },
+    {
+        "brand": "Azithral",
+        "generics": [
+            "Azithromycin"
+        ]
+    },
+    {
+        "brand": "Azee",
+        "generics": [
+            "Azithromycin"
+        ]
+    },
+    {
+        "brand": "Taxim-O",
+        "generics": [
+            "Cefixime"
+        ]
+    },
+    {
+        "brand": "Phexin",
+        "generics": [
+            "Cephalexin"
+        ]
+    },
+    {
+        "brand": "Oflox",
+        "generics": [
+            "Ofloxacin"
+        ]
+    },
+    {
+        "brand": "Norflox",
+        "generics": [
+            "Norfloxacin"
+        ]
+    },
+    {
+        "brand": "Ciplox",
+        "generics": [
+            "Ciprofloxacin"
+        ]
+    },
+    {
+        "brand": "Metrogyl",
+        "generics": [
+            "Metronidazole"
+        ]
+    },
+    {
+        "brand": "Flagyl",
+        "generics": [
+            "Metronidazole"
+        ]
+    },
+    {
+        "brand": "Pan",
+        "generics": [
+            "Pantoprazole"
+        ]
+    },
+    {
+        "brand": "Pan-D",
+        "generics": [
+            "Pantoprazole",
+            "Domperidone"
+        ]
+    },
+    {
+        "brand": "Pantocid",
+        "generics": [
+            "Pantoprazole"
+        ]
+    },
+    {
+        "brand": "Pantop",
+        "generics": [
+            "Pantoprazole"
+        ]
+    },
+    {
+        "brand": "Omez",
+        "generics": [
+            "Omeprazole"
+        ]
+    },
+    {
+        "brand": "Rantac",
+        "generics": [
+            "Ranitidine"
+        ]
+    },
+    {
+        "brand": "Aciloc",
+        "generics": [
+            "Ranitidine"
+        ]
+    },
+    {
+        "brand": "Zinetac",
+        "generics": [
+            "Ranitidine"
+        ]
+    },
+    {
+        "brand": "Gelusil",
+        "generics": [
+            "Aluminum Hydroxide",
+            "Magnesium Hydroxide",
+            "Simethicone"
+        ]
+    },
+    {
+        "brand": "Digene",
+        "generics": [
+            "Aluminum Hydroxide",
+            "Magnesium Hydroxide"
+        ]
+    },
+    {
+        "brand": "Mucaine",
+        "generics": [
+            "Oxetacaine",
+            "Aluminum Hydroxide",
+            "Magnesium Hydroxide"
+        ]
+    },
+    {
+        "brand": "Sporidex",
+        "generics": [
+            "Cephalexin"
+        ]
+    },
+    {
+        "brand": "Allegra",
+        "generics": [
+            "Fexofenadine"
+        ]
+    },
+    {
+        "brand": "Cetzine",
+        "generics": [
+            "Cetirizine"
+        ]
+    },
+    {
+        "brand": "Okacet",
+        "generics": [
+            "Cetirizine"
+        ]
+    },
+    {
+        "brand": "Citrine",
+        "generics": [
+            "Cetirizine"
+        ]
+    },
+    {
+        "brand": "Avil",
+        "generics": [
+            "Pheniramine"
+        ]
+    },
+    {
+        "brand": "Asthalin",
+        "generics": [
+            "Salbutamol"
+        ]
+    },
+    {
+        "brand": "Ascoril",
+        "generics": [
+            "Terbutaline",
+            "Bromhexine",
+            "Guaifenesin",
+            "Menthol"
+        ]
+    },
+    {
+        "brand": "Benadryl",
+        "generics": [
+            "Diphenhydramine"
+        ]
+    },
+    {
+        "brand": "Corex",
+        "generics": [
+            "Chlorpheniramine",
+            "Codeine"
+        ]
+    },
+    {
+        "brand": "Glycomet",
+        "generics": [
+            "Metformin"
+        ]
+    },
+    {
+        "brand": "Glucophage",
+        "generics": [
+            "Metformin"
+        ]
+    },
+    {
+        "brand": "Januvia",
+        "generics": [
+            "Sitagliptin"
+        ]
+    },
+    {
+        "brand": "Galvus",
+        "generics": [
+            "Vildagliptin"
+        ]
+    },
+    {
+        "brand": "Human Mixtard",
+        "generics": [
+            "Insulin Isophane",
+            "Insulin Human"
+        ]
+    },
+    {
+        "brand": "Lantus",
+        "generics": [
+            "Insulin Glargine"
+        ]
+    },
+    {
+        "brand": "Amlong",
+        "generics": [
+            "Amlodipine"
+        ]
+    },
+    {
+        "brand": "Stamlo",
+        "generics": [
+            "Amlodipine"
+        ]
+    },
+    {
+        "brand": "Telma",
+        "generics": [
+            "Telmisartan"
+        ]
+    },
+    {
+        "brand": "Telmikind",
+        "generics": [
+            "Telmisartan"
+        ]
+    },
+    {
+        "brand": "Losar",
+        "generics": [
+            "Losartan"
+        ]
+    },
+    {
+        "brand": "Envas",
+        "generics": [
+            "Enalapril"
+        ]
+    },
+    {
+        "brand": "Atorva",
+        "generics": [
+            "Atorvastatin"
+        ]
+    },
+    {
+        "brand": "Storvas",
+        "generics": [
+            "Atorvastatin"
+        ]
+    },
+    {
+        "brand": "Rozucor",
+        "generics": [
+            "Rosuvastatin"
+        ]
+    },
+    {
+        "brand": "Ecosprin",
+        "generics": [
+            "Aspirin"
+        ]
+    },
+    {
+        "brand": "Sorbitrate",
+        "generics": [
+            "Isosorbide Dinitrate"
+        ]
+    },
+    {
+        "brand": "Shelcal",
+        "generics": [
+            "Calcium",
+            "Vitamin D3"
+        ]
+    },
+    {
+        "brand": "Becosules",
+        "generics": [
+            "B-Complex Vitamins",
+            "Vitamin C"
+        ]
+    },
+    {
+        "brand": "Neurobion",
+        "generics": [
+            "Vitamin B1",
+            "Vitamin B6",
+            "Vitamin B12"
+        ]
+    },
+    {
+        "brand": "Limcee",
+        "generics": [
+            "Vitamin C"
+        ]
+    },
+    {
+        "brand": "Evion",
+        "generics": [
+            "Vitamin E"
+        ]
+    },
+    {
+        "brand": "Polybion",
+        "generics": [
+            "Vitamin B Complex"
+        ]
+    },
+    {
+        "brand": "Liv-52",
+        "generics": [
+            "Herbal Extraction"
+        ]
+    },
+    {
+        "brand": "Volini",
+        "generics": [
+            "Diclofenac",
+            "Linseed Oil",
+            "Menthol"
+        ]
+    },
+    {
+        "brand": "Voveran",
+        "generics": [
+            "Diclofenac"
+        ]
+    },
+    {
+        "brand": "Omnigel",
+        "generics": [
+            "Diclofenac",
+            "Linseed Oil",
+            "Menthol"
+        ]
+    },
+    {
+        "brand": "Brufen",
+        "generics": [
+            "Ibuprofen"
+        ]
+    },
+    {
+        "brand": "Meftal-Spas",
+        "generics": [
+            "Mefenamic Acid",
+            "Dicyclomine"
+        ]
+    },
+    {
+        "brand": "Cyclopam",
+        "generics": [
+            "Dicyclomine",
+            "Paracetamol"
+        ]
+    },
+    {
+        "brand": "Ultracet",
+        "generics": [
+            "Tramadol",
+            "Acetaminophen"
+        ]
+    },
+    {
+        "brand": "Zerodol",
+        "generics": [
+            "Aceclofenac"
+        ]
+    },
+    {
+        "brand": "Acitrom",
+        "generics": [
+            "Acenocoumarol"
+        ]
+    },
+    {
+        "brand": "Clexane",
+        "generics": [
+            "Enoxaparin"
+        ]
+    }
+]

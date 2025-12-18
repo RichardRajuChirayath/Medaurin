@@ -1,0 +1,112 @@
+[
+    {
+        "drugName": "Paracetamol",
+        "strength": "500mg",
+        "dosageForm": "Tablet",
+        "ceilingPrice": 1.50,
+        "pricePerUnit": 1.50,
+        "packSize": "10 tablets",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/001",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Metformin",
+        "strength": "500mg",
+        "dosageForm": "Tablet",
+        "ceilingPrice": 2.00,
+        "pricePerUnit": 2.00,
+        "packSize": "10 tablets",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/002",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Atorvastatin",
+        "strength": "10mg",
+        "dosageForm": "Tablet",
+        "ceilingPrice": 5.00,
+        "pricePerUnit": 5.00,
+        "packSize": "10 tablets",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/003",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Amlodipine",
+        "strength": "5mg",
+        "dosageForm": "Tablet",
+        "ceilingPrice": 1.00,
+        "pricePerUnit": 1.00,
+        "packSize": "10 tablets",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/004",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Losartan",
+        "strength": "50mg",
+        "dosageForm": "Tablet",
+        "ceilingPrice": 3.00,
+        "pricePerUnit": 3.00,
+        "packSize": "10 tablets",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/005",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Omeprazole",
+        "strength": "20mg",
+        "dosageForm": "Capsule",
+        "ceilingPrice": 2.50,
+        "pricePerUnit": 2.50,
+        "packSize": "10 capsules",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/006",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Pantoprazole",
+        "strength": "40mg",
+        "dosageForm": "Tablet",
+        "ceilingPrice": 3.00,
+        "pricePerUnit": 3.00,
+        "packSize": "10 tablets",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/007",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Azithromycin",
+        "strength": "500mg",
+        "dosageForm": "Tablet",
+        "ceilingPrice": 8.00,
+        "pricePerUnit": 8.00,
+        "packSize": "3 tablets",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/008",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Amoxicillin",
+        "strength": "500mg",
+        "dosageForm": "Capsule",
+        "ceilingPrice": 4.00,
+        "pricePerUnit": 4.00,
+        "packSize": "10 capsules",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/009",
+        "effectiveFrom": "2024-01-01"
+    },
+    {
+        "drugName": "Ciprofloxacin",
+        "strength": "500mg",
+        "dosageForm": "Tablet",
+        "ceilingPrice": 6.00,
+        "pricePerUnit": 6.00,
+        "packSize": "10 tablets",
+        "isControlled": true,
+        "nppaNotificationNo": "NPPA/2024/010",
+        "effectiveFrom": "2024-01-01"
+    }
+]

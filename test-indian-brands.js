@@ -1,49 +1,49 @@
-// Test script for Indian Brand mapping
-const indianBrands = ["Dolo", "Crocin", "Metrogyl"];
+const { validateMedicineName } = require('./lib/medicine-validator');
 
-// Mock of the mapping from the API
-const BRAND_TO_GENERIC_MAPPING = {
-    "dolo": "acetaminophen",
-    "crocin": "acetaminophen",
-    "metrogyl": "metronidazole"
-};
+// Mock cache to avoid compilation errors in node environment if needed
+// Or simply rely on the fact that we can't easily run this in isolation without full environment
+// Instead I will create a test that hits the API endpoint which uses the new logic.
 
-async function testIndianBrandSearch() {
-    for (const brand of indianBrands) {
-        console.log(`\n--- Testing ${brand} ---`);
-        const lowerName = brand.toLowerCase();
+const API_URL = 'http://localhost:3000/api/getDrugData';
 
-        let searchName = brand;
-        let isMappedToGeneric = false;
+const INDIAN_BRANDS = [
+    'Dolo 650',
+    'Calpol',
+    'Pan D',
+    'Saridon',
+    'Augmentin',
+    'Allegra'
+];
 
-        if (BRAND_TO_GENERIC_MAPPING[lowerName]) {
-            searchName = BRAND_TO_GENERIC_MAPPING[lowerName];
-            isMappedToGeneric = true;
-            console.log(`[Mapping] ✓ Mapped "${brand}" to generic: "${searchName}"`);
-        }
+async function testIndianBrands() {
+    console.log('🇮🇳 TESTING INDIAN BRAND RECOGNITION 🇮🇳');
+    console.log('=======================================');
 
-        if (isMappedToGeneric) {
-            console.log(`[FDA] Searching by substance_name: "${searchName}"`);
-            try {
-                const response = await fetch(
-                    `https://api.fda.gov/drug/label.json?search=openfda.substance_name:"${encodeURIComponent(searchName)}"&limit=1`
-                );
-                const data = await response.json();
-                console.log(`[Result] Found ${data.results?.length || 0} results`);
+    for (const brand of INDIAN_BRANDS) {
+        try {
+            console.log(`\nTesting: "${brand}"...`);
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ medicines: [brand] })
+            });
 
-                if (data.results?.length > 0) {
-                    console.log(`[Success] Retrieved FDA data for ${brand} (via ${searchName})`);
-                    if (data.results[0].adverse_reactions) {
-                        console.log(`[Data] Has adverse reactions data: Yes`);
-                    }
-                }
-            } catch (e) {
-                console.error("Error fetching:", e.message);
+            if (res.ok) {
+                const data = await res.json();
+                const result = data[0];
+                console.log(`✅ SUCCESS: "${brand}" validated!`);
+                console.log(`   -> Normalized Name: ${result.normalizedName}`); // Should be Generic (e.g., Acetaminophen)
+                console.log(`   -> RxCUI: ${result.rxcui} (Found in RxNorm via generic mapping)`);
+            } else {
+                const err = await res.json();
+                console.log(`❌ FAILED: "${brand}" rejected.`);
+                console.log(`   Reason: ${err.invalidMedicines?.[0]?.reason}`);
             }
-        } else {
-            console.log("Not mapped, would search by brand name.");
+        } catch (e) {
+            console.log(`❌ ERROR: ${e.message}`);
         }
     }
 }
 
-testIndianBrandSearch();
+// Check server and run
+fetch('http://localhost:3000').then(() => testIndianBrands()).catch(() => console.log("Server not running. Start with 'npm run dev'"));

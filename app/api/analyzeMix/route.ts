@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from "next/server"
 import {
   normalizeDrugName,
   getDrugInteractionsFromNIH,
-  getDrugClass
+  getDrugClass,
+  getDiseaseContraindications
 } from "@/lib/drug-interaction-service"
 
 interface MedicineWithFDA {
@@ -13,6 +14,8 @@ interface MedicineWithFDA {
   pharmClass?: string[]
   sideEffects?: string[]
   isUnknown?: boolean
+  apiError?: boolean
+  apiStatus?: string
 }
 
 interface Interaction {
@@ -24,7 +27,7 @@ interface Interaction {
 }
 
 interface AnalysisResult {
-  status: "safe" | "caution" | "danger"
+  status: "safe" | "caution" | "danger" | "unknown" | "insufficient"
   score: number
   medicines: string[]
   interactions: Interaction[]
@@ -38,16 +41,33 @@ interface AnalysisResult {
     sideEffects?: string[]
     isUnknown?: boolean
   }>
+  unknownMedicines?: string[]
+  doubleDosingWarnings?: string[]
+  healthWarnings?: string[]
 }
+
+import { prisma } from "@/lib/prisma"
+import { getSession } from "@/lib/session"
 
 export async function POST(request: NextRequest) {
   try {
     const { medicines } = await request.json()
+    const session = await getSession()
 
     console.log("Received medicines for analysis:", JSON.stringify(medicines, null, 2))
 
     if (!medicines || !Array.isArray(medicines) || medicines.length === 0) {
       return NextResponse.json({ error: "No medicines provided" }, { status: 400 })
+    }
+
+    // 1. Safety Checks (Double Dosing + Health Profile)
+    const doubleDosingWarnings: string[] = []
+    const healthWarnings: string[] = []
+    let hasMissingSafetyData = false
+
+    // Safety checks logic moved to after normalization (lines 200+)
+    if (session?.userId) {
+      // Placeholder to keep TS happy if I use nested scopes, but I'll implement logic below
     }
 
 
@@ -60,65 +80,169 @@ export async function POST(request: NextRequest) {
       medicines.map(async (m: MedicineWithFDA) => {
         // Always normalize based on USER INPUT to prevent bypassing similarity check
         const normalized = await normalizeDrugName(m.name)
-        return { ...m, rxcui: normalized.rxcui, normalizedName: normalized.normalizedName }
+        return { ...m, rxcui: normalized.rxcui, normalizedName: normalized.normalizedName, apiError: normalized.apiError }
       })
     )
     console.log("[Analysis] Normalized:", normalizedDrugs.map(d => ({ userInput: d.name, rxcui: d.rxcui, isUnknown: d.isUnknown })))
 
-    // LENIENT CHECK: A medicine is unrecognized ONLY if:
-    // It's NOT found in RxNorm (no rxcui) AND NOT found in FDA (isUnknown = true)
-    // This allows medicines that exist in ANY database to be analyzed
+    // ============================================
+    // STRICT VALIDATION RULE (RxNorm ONLY)
+    // ============================================
+    // A medicine is VALID if and only if: rxcui !== null
+    // 
+    // FDA label presence does NOT make something a valid medicine
+    // (FDA includes cosmetics, sanitizers, sunscreens, OTC products)
+    //
+    // Note: Indian brands were already resolved upstream in the validator
+    // and have rxcui values from their generic equivalents
     const unrecognizedMedicines = normalizedDrugs.filter(d => {
-      const notInRxNorm = !d.rxcui
-      const notInFDA = d.isUnknown === true
+      // Skip if API error occurred (handled separately)
+      if (d.apiError) return false
 
-      console.log(`[Validation] ${d.name}: RxNorm=${d.rxcui || 'NOT FOUND'}, FDA=${notInFDA ? 'NOT FOUND' : 'FOUND'}`)
+      const hasRxcui = d.rxcui !== null && d.rxcui !== undefined
 
-      // Only reject if it's not in BOTH databases
-      const notFoundAnywhere = notInRxNorm && notInFDA
-
-      if (notFoundAnywhere) {
-        console.log(`[Validation] ❌ ${d.name} not found in ANY database`)
-      } else if (d.rxcui) {
-        console.log(`[Validation] ✅ ${d.name} found in RxNorm`)
-      } else if (!notInFDA) {
-        console.log(`[Validation] ✅ ${d.name} found in FDA`)
+      if (hasRxcui) {
+        console.log(`[Validation] ✅ "${d.name}" - RxNorm valid (rxcui: ${d.rxcui})`)
+        return false // Valid
+      } else {
+        console.log(`[Validation] ❌ "${d.name}" - NOT in RxNorm (no rxcui)`)
+        return true // Invalid
       }
-
-      return notFoundAnywhere
     }).map(d => d.name)
+
+    const apiErrorMedicines = normalizedDrugs.filter(d => d.apiError).map(d => d.name)
+
+    // Handle interactions logic...
+    // If we have API errors, we should probably warn or include in details
+    if (apiErrorMedicines.length > 0) {
+      console.log(`[Analysis] ⚠️ API ERRORS for: ${apiErrorMedicines.join(", ")}`)
+    }
 
     if (unrecognizedMedicines.length > 0) {
       console.log(`[Analysis] ❌ UNRECOGNIZED medicines found: ${unrecognizedMedicines.join(", ")}`)
 
+      // Check for potential high-risk medicines that failed validation
+      const HIGH_RISK_KEYWORDS = ["acenocoumarol", "warfarin", "enoxaparin", "heparin", "dabigatran", "apixaban", "rivaroxaban", "acitrom", "clexane"]
+
+      const potentialHighRisks = unrecognizedMedicines.filter(med =>
+        HIGH_RISK_KEYWORDS.some(k => med.toLowerCase().includes(k))
+      )
+
+      const recommendations = [
+        `⚠️ The following medicine(s) were NOT RECOGNIZED in our medical databases (RxNorm, FDA): ${unrecognizedMedicines.join(", ")}.`,
+        "We cannot perform a safety analysis without valid medicine names.",
+        "Please:",
+        "• Check the spelling carefully",
+        "• Try entering the generic/scientific name (e.g., 'Acetaminophen' instead of brand names)",
+        "• Ensure you're entering actual medicine names, not random text",
+        "• For Indian brands, try common names like 'Dolo', 'Crocin', 'Paracetamol', etc."
+      ]
+
+      // Prepend critical warning if high-risk medicine is suspected
+      if (potentialHighRisks.length > 0) {
+        recommendations.unshift(`🚨 CRITICAL WARNING: You appear to be entering a HIGH-RISK medicine (${potentialHighRisks.join(", ")}). Manual verification is REQUIRED. Please check spelling carefully.`)
+      }
+
       return NextResponse.json({
         status: "unknown",
         score: 0,
-        medicines: medicines.map((m: MedicineWithFDA) => m.name),
+        medicines: medicines
+          .filter((m: MedicineWithFDA) => !unrecognizedMedicines.includes(m.name))
+          .map((m: MedicineWithFDA) => m.name),
         interactions: [],
-        recommendations: [
-          `⚠️ The following medicine(s) were NOT RECOGNIZED in our medical databases (RxNorm, FDA): ${unrecognizedMedicines.join(", ")}.`,
-          "We cannot perform a safety analysis without valid medicine names.",
-          "Please:",
-          "• Check the spelling carefully",
-          "• Try entering the generic/scientific name (e.g., 'Acetaminophen' instead of brand names)",
-          "• Ensure you're entering actual medicine names, not random text",
-          "• For Indian brands, try common names like 'Dolo', 'Crocin', 'Paracetamol', etc."
-        ],
-        medicineDetails: medicines.map((m: MedicineWithFDA) => ({
-          name: m.name,
-          fdaText: m.fdaText,
-          genericName: m.genericName,
-          brandName: m.brandName,
-          pharmClass: m.pharmClass,
-          sideEffects: m.sideEffects,
-          isUnknown: m.isUnknown,
-        })),
-        unrecognized: unrecognizedMedicines
+        recommendations: recommendations,
+        medicineDetails: medicines
+          .filter((m: MedicineWithFDA) => !unrecognizedMedicines.includes(m.name))
+          .map((m: MedicineWithFDA) => ({
+            name: m.name,
+            fdaText: m.fdaText,
+            genericName: m.genericName,
+            brandName: m.brandName,
+            pharmClass: m.pharmClass,
+            sideEffects: m.sideEffects,
+            isUnknown: m.isUnknown,
+          })),
+        unknownMedicines: unrecognizedMedicines
       })
     }
 
     console.log(`[Analysis] ✅ All medicines validated successfully`)
+
+    // ============================================
+    // 1. SAFETY CHECKS (Authorized Users Only)
+    // ============================================
+    // Relocated here to access 'normalizedDrugs' for higher accuracy
+    if (session?.userId && normalizedDrugs.length > 0) {
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: session.userId },
+          select: { allergies: true, conditions: true }
+        })
+
+        // --- Double Dosing ---
+        const startOfDay = new Date()
+        startOfDay.setHours(0, 0, 0, 0)
+        const todaysLogs = await prisma.dosageLog.findMany({
+          where: { userId: session.userId, takenAt: { gte: startOfDay }, status: { in: ["TAKEN", "taken"] } },
+          include: { medication: true }
+        })
+
+        const loggedNames = todaysLogs.map(l => ({ name: l.medication.medicineName.toLowerCase(), time: l.takenAt }))
+
+        // Use Promise.all for parallel API calls if needed, though we iterate sequentially for simplicity or use normalizedDrugs
+        // actually iterating simpler for warnings
+        for (const drug of normalizedDrugs) {
+          // A. Double Dosing
+          const normName = drug.normalizedName.toLowerCase()
+          const match = loggedNames.find(l => l.name.includes(normName) || normName.includes(l.name))
+
+          if (match) {
+            const timeString = new Date(match.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            doubleDosingWarnings.push(`⚠️ ALREADY TAKEN: You have already logged taking "${drug.normalizedName}" (or similar) today at ${timeString}.`)
+          }
+
+          // B. Allergy Check
+          if (user?.allergies) {
+            user.allergies.forEach(allergy => {
+              if (normName.includes(allergy.toLowerCase()) || allergy.toLowerCase().includes(normName)) {
+                healthWarnings.push(`🚫 ALLERGY ALERT: "${drug.normalizedName}" matches your allergy to "${allergy}".`)
+              }
+            })
+          }
+
+          // C. Condition Check (RxClass API - OFFICIAL)
+          if (user?.conditions && user.conditions.length > 0) {
+            console.log(`[Safety] Checking contraindications for ${drug.normalizedName}...`)
+            // Fetch official contraindications from RxNav/MEDRT
+            // We use normalizedName because the API requires standard names (e.g. aspirin) not brand names
+            const contraindications = await getDiseaseContraindications(drug.normalizedName)
+
+            // GUARD: If no data found, avoid claiming "Safe"
+            if (contraindications.length === 0) {
+              hasMissingSafetyData = true
+              healthWarnings.push(`ℹ️ NOTE: Official contraindication data currently unavailable for "${drug.normalizedName}".`)
+            }
+
+            // Compare against user conditions (Fuzzy)
+            user.conditions.forEach(userCond => {
+              const uCond = userCond.toLowerCase()
+              // Check if any contraindication matches user condition (substring match)
+              // e.g. "Asthma" matches "Bronchial Asthma"
+              const match = contraindications.find(ci =>
+                ci.toLowerCase().includes(uCond) || uCond.includes(ci.toLowerCase())
+              )
+
+              if (match) {
+                healthWarnings.push(`⚠️ HEALTH RISK: "${drug.normalizedName}" is contraindicated for "${match}" (matches your condition "${userCond}").`)
+              }
+            })
+          }
+        }
+
+      } catch (err) {
+        console.error("Safety check error:", err)
+      }
+    }
 
     // Check if all medicines are actually the same drug
     if (medicines.length >= 2) {
@@ -158,15 +282,26 @@ export async function POST(request: NextRequest) {
     // Handle single medicine case (AFTER validation)
     if (medicines.length === 1) {
       const singleMedicineResult: AnalysisResult = {
-        status: "safe",
+        status: "insufficient",
         score: 0,
         medicines: medicines.map((m: MedicineWithFDA) => m.name),
         interactions: [],
         recommendations: [
-          "No interactions to analyze for a single medicine.",
-          "Always follow the dosing instructions provided with your medicine.",
-          "Inform your doctor of all medicines you are taking, including over-the-counter drugs and supplements.",
+          "Only one medicine was detected.",
+          "To analyze interactions, we need at least two medicines.",
+          "Please check with two medicines or click the picture properly to ensure all medicines are visible."
         ],
+        medicineDetails: medicines.map((m: MedicineWithFDA) => ({
+          name: m.name,
+          fdaText: m.fdaText,
+          genericName: m.genericName,
+          brandName: m.brandName,
+          pharmClass: m.pharmClass,
+          sideEffects: m.sideEffects,
+          isUnknown: m.isUnknown,
+        })),
+        doubleDosingWarnings, // Critical: Include warnings even for single medicine
+        healthWarnings
       }
       return NextResponse.json(singleMedicineResult)
     }
@@ -204,10 +339,20 @@ export async function POST(request: NextRequest) {
     console.log(`[Analysis] Risk breakdown:`, riskBreakdown)
 
     // Determine status
-    const status = determineStatus(score)
+    // Determine status
+    let status = determineStatus(score)
+
+    // Internal Guard: Avoid claiming "Safe" if official data was missing
+    if (status === "safe" && hasMissingSafetyData) {
+      status = "caution"
+    }
 
     // Generate recommendations with risk factors
     const recommendations = generateRecommendations(status, allInteractions, medicines)
+
+    if (hasMissingSafetyData) {
+      recommendations.push("⚠️ Note: Some official safety data was unavailable. We could not fully verify contraindications against your health profile.")
+    }
 
     // Add risk factors to recommendations
     if (riskBreakdown.riskFactors.length > 0) {
@@ -222,6 +367,8 @@ export async function POST(request: NextRequest) {
       medicines: medicines.map((m: MedicineWithFDA) => m.name),
       interactions: allInteractions,
       recommendations,
+      doubleDosingWarnings, // Add warnings here
+      healthWarnings,
       medicineDetails: medicines.map((m: MedicineWithFDA) => ({
         name: m.name,
         fdaText: m.fdaText,
@@ -230,6 +377,8 @@ export async function POST(request: NextRequest) {
         pharmClass: m.pharmClass,
         sideEffects: m.sideEffects,
         isUnknown: m.isUnknown,
+        apiError: normalizedDrugs.find(n => n.name === m.name)?.apiError,
+        apiStatus: normalizedDrugs.find(n => n.name === m.name)?.apiError ? "api_error" : undefined,
       })),
       riskBreakdown: {
         interactionScore: riskBreakdown.interactionScore,
@@ -515,8 +664,8 @@ function checkDangerousCombinations(medicines: MedicineWithFDA[]): Interaction[]
   }
 
   // Check Blood Thinners vs NSAIDs
-  const bloodThinners = ["warfarin", "coumadin", "heparin", "enoxaparin", "rivaroxaban", "apixaban", "dabigatran", "xarelto", "eliquis"]
-  const nsaids = ["aspirin", "ibuprofen", "naproxen", "diclofenac", "celecoxib", "advil", "motrin", "aleve", "celebrex"]
+  const bloodThinners = ["warfarin", "coumadin", "heparin", "enoxaparin", "rivaroxaban", "apixaban", "dabigatran", "xarelto", "eliquis", "acenocoumarol", "acitrom", "clexane", "pradaxa", "savaysa", "edoxaban"]
+  const nsaids = ["aspirin", "ibuprofen", "naproxen", "diclofenac", "celecoxib", "advil", "motrin", "aleve", "celebrex", "voltaren", "mobic", "meloxicam"]
 
   const hasBloodThinner = medicines.find(m =>
     bloodThinners.some(d => m.name.toLowerCase().includes(d)) ||
@@ -537,6 +686,30 @@ function checkDangerousCombinations(medicines: MedicineWithFDA[]): Interaction[]
       severity: "high",
       description: "🚨 HIGH RISK: Combining blood thinners with NSAIDs significantly increases the risk of serious bleeding, including gastrointestinal and intracranial bleeding. Avoid this combination."
     })
+  } else if (medicines.length >= 2) {
+    // Check for Multiple Anticoagulants (e.g. Acitrom + Clexane)
+    const bloodThinnerMeds = medicines.filter(m =>
+      bloodThinners.some(d => m.name.toLowerCase().includes(d)) ||
+      (m.genericName && m.genericName.some(n => bloodThinners.some(d => n.toLowerCase().includes(d)))) ||
+      (m.brandName && m.brandName.some(n => bloodThinners.some(d => n.toLowerCase().includes(d)))) ||
+      (m.pharmClass && m.pharmClass.some(c => c.toLowerCase().includes("anticoagulant")))
+    )
+
+    if (bloodThinnerMeds.length >= 2) {
+      // Simple check to ensure they are not just the same med listed twice (handled by standard validation but good to be safe)
+      const med1 = bloodThinnerMeds[0]
+      const med2 = bloodThinnerMeds[1]
+
+      // Only flag if they appear different
+      if (med1.name.toLowerCase() !== med2.name.toLowerCase()) {
+        interactions.push({
+          from: med1.name,
+          to: med2.name,
+          severity: "high",
+          description: "🚨 CRITICAL: Multiple anticoagulants detected. Using more than one blood thinner (e.g., Warfarin + Enoxaparin) increases bleeding risk exponentially. Ensure this is intentional (e.g., bridging therapy) and strictly monitored."
+        })
+      }
+    }
   }
 
   // Check Statins vs certain antibiotics

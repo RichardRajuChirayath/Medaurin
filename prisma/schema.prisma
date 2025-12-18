@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,122 +8,225 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  username      String?   @unique
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  allergies     String[]  @default([])
-  conditions    String[]  @default([])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String       @id @default(cuid())
+  name        String?
+  username    String?      @unique
+  avatarUrl   String?
+  allergies   String[]     @default([])
+  conditions  String[]     @default([])
+  fcmToken    String?
   
-  accounts      Account[]
-  sessions      Session[]
-  analyses      Analysis[]
-  medications   Medication[]
-  dosageLogs    DosageLog[]
-  favorites     Favorite[]
+  // Contact & Auth
+  phoneNumber String?      @unique
+  email       String?      @unique
+  emailVerified DateTime?
+  firebaseUid String?      @unique
+  
+  // SaaS Features
+  notificationSettings Json?  @default("{\"email\":true,\"push\":true,\"marketing\":false}")
+  medicineBudget Float? // Monthly medicine budget for alerts
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  analyses    Analysis[]
+  dosageLogs  DosageLog[]
+  favorites   Favorite[]
+  medications Medication[]
+  sessions    Session[]
+  loginHistory LoginHistory[]
+  expenses    MedicineExpense[]
+  emailConfig EmailConfig?
+
+  // Caregiver System
+  caregivers  CareRelationship[] @relation("PatientToCaregiver")
+  patients    CareRelationship[] @relation("CaregiverToPatient")
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+model CareRelationship {
+  id          String   @id @default(cuid())
+  caregiverId String
+  patientId   String
+  status      String   @default("PENDING") // PENDING, ACTIVE, REJECTED
+  nickname    String?  // e.g., "Mom", "Grandpa"
+  permissions Json?    @default("{\"view_logs\":true,\"receive_alerts\":true,\"remote_nudge\":true}")
+  
+  caregiver   User     @relation("CaregiverToPatient", fields: [caregiverId], references: [id], onDelete: Cascade)
+  patient     User     @relation("PatientToCaregiver", fields: [patientId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@unique([provider, providerAccountId])
+  @@unique([caregiverId, patientId])
+  @@index([caregiverId])
+  @@index([patientId])
 }
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
+  sessionToken String   @unique // The actual JWT or session ID stored in cookie
   userId       String
   expires      DateTime
+  
+  // Device Tracking
+  ipAddress    String?
+  userAgent    String?
+  device       String?  // Parsed device name e.g. "Chrome on Windows"
+  location     String?
+  
+  lastActive   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+model LoginHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  ipAddress String?
+  userAgent String?
+  device    String?
+  location  String?
+  
+  status    String   // "SUCCESS", "FAILED", "SUSPICIOUS"
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([identifier, token])
+  @@index([userId])
 }
 
 model Analysis {
   id              String   @id @default(cuid())
   userId          String
-  medicines       String[] // Array of medicine names
-  status          String   // "safe", "caution", "danger"
+  medicines       String[]
+  status          String
   score           Int
-  analysisType    String   // "photo" or "manual"
-  interactions    Json     // Store interactions as JSON
-  recommendations String[] // Array of recommendations
+  analysisType    String
+  interactions    Json
+  recommendations String[]
   createdAt       DateTime @default(now())
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([createdAt])
 }
 
 model Medication {
-  id              String   @id @default(cuid())
+  id              String      @id @default(cuid())
   userId          String
   medicineName    String
-  dosage          String   // e.g., "500mg", "1 tablet"
-  frequency       String   // e.g., "twice daily", "every 8 hours"
-  reminderTimes   String[] // e.g., ["09:00", "21:00"]
-  reminderEnabled Boolean  @default(true)
-  startDate       DateTime @default(now())
+  dosage          String
+  frequency       String
+  reminderTimes   String[]
+  reminderEnabled Boolean     @default(true)
+  startDate       DateTime    @default(now())
   endDate         DateTime?
   notes           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   dosageLogs      DosageLog[]
-  
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model DosageLog {
-  id            String   @id @default(cuid())
+  id            String     @id @default(cuid())
   userId        String
   medicationId  String
-  takenAt       DateTime @default(now())
-  scheduledTime String   // e.g., "09:00"
-  status        String   // "taken", "missed", "skipped"
+  takenAt       DateTime   @default(now())
+  scheduledTime String
+  status        String
   notes         String?
-  
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   medication    Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
-  
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([medicationId])
   @@index([takenAt])
 }
 
 model Favorite {
-  id          String   @id @default(cuid())
-  userId      String
-  medicines   String[] // Array of medicine names
-  name        String?  // Optional name for the combination
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  medicines String[]
+  name      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model MedicineExpense {
+  id            String   @id @default(cuid())
+  userId        String
   
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Medicine Details
+  medicineName  String
+  quantity      String?  // e.g., "10 tablets", "1 bottle"
+  price         Float
+  category      String?  // e.g., "tablet", "syrup", "injection", "ointment"
   
+  // Purchase Details
+  purchaseDate  DateTime @default(now())
+  pharmacyName  String?
+  pharmacyLocation String? // For OSM intelligence
+  
+  // Import Source
+  importSource  String   @default("manual") // "manual", "ocr", "email", "auto"
+  invoiceUrl    String?  // Optional: link to uploaded invoice
+  rawInvoiceText String? @db.Text // For future reference
+  
+  // India Government Verification (CDSCO/NPPA)
+  govApprovalStatus String   @default("UNKNOWN") // APPROVED / BANNED / UNKNOWN
+  isBanned          Boolean  @default(false)
+  govMrp            Float?   // Government-approved MRP from NPPA
+  isOverpriced      Boolean  @default(false)
+  manufacturerName  String?
+  manufacturerLicense String?
+  verifiedAt        DateTime?
+  verificationAlerts String[] @default([])
+  
+  // Optional
+  notes         String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([purchaseDate])
+  @@index([pharmacyName])
+  @@index([isBanned])
+  @@index([govApprovalStatus])
+}
+
+model EmailConfig {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  
+  // IMAP Settings
+  email         String
+  imapServer    String   // e.g., "imap.gmail.com"
+  imapPort      Int      @default(993)
+  
+  // Encrypted App Password (AES-256)
+  encryptedPassword String @db.Text
+  
+  // Auto-import settings
+  autoImportEnabled Boolean @default(false)
+  lastSyncedAt  DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }

@@ -1,8 +1,8 @@
 "use client"
 
-import type React from "react"
-import { useRef, useState } from "react"
-import { Upload, Camera, FileImage, CheckCircle2, Sparkles, Image as ImageIcon } from "lucide-react"
+import { useState } from "react"
+import { Camera, Sparkles, ScanLine, Zap, CheckCircle2 } from "lucide-react"
+import { SmartCamera } from "@/components/smart-camera"
 
 interface UploadBoxProps {
   onUpload: (file: File) => void
@@ -10,37 +10,8 @@ interface UploadBoxProps {
 }
 
 export function UploadBox({ onUpload, disabled }: UploadBoxProps) {
-  const [isDragActive, setIsDragActive] = useState(false)
+  const [isCameraOpen, setIsCameraOpen] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setIsDragActive(true)
-    } else if (e.type === "dragleave") {
-      setIsDragActive(false)
-    }
-  }
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragActive(false)
-
-    const files = e.dataTransfer.files
-    if (files && files[0]) {
-      handleFile(files[0])
-    }
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files && files[0]) {
-      handleFile(files[0])
-    }
-  }
 
   const handleFile = (file: File) => {
     if (file.type.startsWith("image/")) {
@@ -49,143 +20,91 @@ export function UploadBox({ onUpload, disabled }: UploadBoxProps) {
         setPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
-
       onUpload(file)
-    }
-  }
-
-  const handleClick = () => {
-    if (!disabled) {
-      inputRef.current?.click()
     }
   }
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={handleClick}
-        className={`group relative overflow-hidden rounded-3xl transition-all duration-500 cursor-pointer ${disabled ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-      >
-        {/* Animated Border Gradient */}
-        <div className={`absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl ${isDragActive ? "opacity-100 animate-pulse-glow" : ""
-          }`} />
+      {/* Smart Camera Modal */}
+      {isCameraOpen && (
+        <SmartCamera
+          onCapture={(file) => {
+            handleFile(file)
+            setIsCameraOpen(false)
+          }}
+          onClose={() => setIsCameraOpen(false)}
+        />
+      )}
 
-        {/* Main Container */}
-        <div className={`relative border-3 rounded-3xl p-16 text-center transition-all duration-500 ${isDragActive
-          ? "border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 scale-[1.02] shadow-2xl neon-glow"
-          : "border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-2xl"
-          } ${disabled ? "" : "hover:scale-[1.01]"}`}
-        >
+      {/* Main Action Area */}
+      <div className="relative group">
 
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleChange}
-            className="hidden"
-            disabled={disabled}
-          />
+        {/* Animated Glow Background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 rounded-3xl blur-2xl opacity-30 group-hover:opacity-60 transition-all duration-500 animate-pulse-glow" />
 
-          <div className="flex flex-col items-center gap-8">
-            {/* Icon Container with Particles */}
-            <div className="relative">
-              {/* Glow Effect */}
-              <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-20 blur-3xl transition-all duration-500 ${isDragActive ? "scale-150 opacity-50 animate-pulse-glow" : "scale-100"
-                }`}
-              />
+        <div className={`relative bg-black/5 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-12 text-center overflow-hidden transition-all duration-500 ${disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-[1.01] hover:border-indigo-500/50"}`}>
 
-              {/* Rotating Ring */}
-              <div className={`absolute inset-0 w-32 h-32 rounded-3xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-20 transition-all duration-700 ${isDragActive ? "animate-rotate-gradient" : ""
-                }`}
-              />
+          {/* Decorative Grid */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
 
-              {/* Icon Background */}
-              <div className={`relative w-32 h-32 rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 flex items-center justify-center transition-all duration-500 shadow-2xl ${isDragActive ? "scale-110 rotate-6" : "group-hover:scale-105"
-                }`}
-              >
-                {isDragActive ? (
-                  <Upload className="w-16 h-16 text-white animate-bounce" />
-                ) : preview ? (
-                  <CheckCircle2 className="w-16 h-16 text-white animate-scale-in" />
-                ) : (
-                  <Camera className="w-16 h-16 text-white group-hover:scale-110 transition-transform" />
-                )}
+          <div className="relative z-10 flex flex-col items-center gap-8">
 
-                {/* Sparkle Effect */}
-                {!preview && (
-                  <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-300 animate-pulse" />
-                )}
-              </div>
-            </div>
-
-            {/* Text Content */}
-            <div className="space-y-4">
-              <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                {isDragActive ? (
-                  <span className="gradient-text-animated">Drop your image here</span>
-                ) : preview ? (
-                  <span className="text-green-600 dark:text-green-400">Image uploaded successfully!</span>
-                ) : (
-                  "Upload Medicine Photo"
-                )}
-              </h3>
-
-              <p className="text-lg text-slate-700 dark:text-slate-300 max-w-lg mx-auto font-medium leading-relaxed">
-                {isDragActive ? (
-                  "Release to upload"
-                ) : preview ? (
-                  "Processing your image with AI..."
-                ) : (
-                  "Drag and drop your medicine photo here, or click to browse"
-                )}
-              </p>
-            </div>
-
-            {/* Preview Image */}
-            {preview && (
-              <div className="mt-6 rounded-3xl overflow-hidden border-4 border-indigo-500 shadow-2xl max-w-md animate-scale-in neon-glow">
+            {preview ? (
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-indigo-500/50 max-w-md mx-auto animate-scale-in">
                 <img src={preview} alt="Preview" className="w-full h-auto" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center p-4">
+                  <div className="flex items-center gap-2 text-white font-bold">
+                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                    <span>Image Captured</span>
+                  </div>
+                </div>
               </div>
-            )}
+            ) : (
+              <>
+                {/* Big Smart Scan Button */}
+                <button
+                  onClick={() => setIsCameraOpen(true)}
+                  disabled={disabled}
+                  className="group/btn relative w-full max-w-md mx-auto aspect-video flex flex-col items-center justify-center bg-zinc-900 hover:bg-zinc-800 border-2 border-zinc-700 hover:border-yellow-400/50 rounded-3xl transition-all duration-500 shadow-2xl hover:shadow-[0_0_50px_rgba(234,179,8,0.2)] overflow-hidden"
+                >
+                  {/* Internal Glow */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-purple-500/0 to-yellow-500/10 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500" />
 
-            {/* Upload Button */}
-            {!preview && !isDragActive && (
-              <button
-                type="button"
-                className="group/btn mt-6 px-10 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white font-black rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl neon-glow-hover relative overflow-hidden"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleClick()
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 opacity-0 group-hover/btn:opacity-30 transition-opacity blur-xl" />
-                <span className="flex items-center gap-3 relative z-10 text-lg">
-                  <FileImage className="w-6 h-6" />
-                  Choose File
-                </span>
-              </button>
-            )}
+                  <div className="relative z-10 flex flex-col items-center gap-4 group-hover/btn:scale-105 transition-transform duration-500">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-20 animate-pulse" />
+                      <Camera className="w-20 h-20 text-yellow-400 drop-shadow-lg" />
+                      <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-white animate-bounce" />
+                    </div>
 
-            {/* File Info */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-700 dark:text-slate-300 mt-6 font-bold">
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                <span>JPG, PNG, GIF</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                <span>Max 10MB</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
-                <span>Clear labels recommended</span>
-              </div>
-            </div>
+                    <div className="space-y-1">
+                      <h3 className="text-3xl font-black text-white tracking-tight">Smart Scan</h3>
+                      <p className="text-zinc-400 font-medium">Tap to analyze medicines</p>
+                    </div>
+                  </div>
+
+                  {/* Tech Lines */}
+                  <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+                  {/* Scanning Animation Line */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-yellow-400/50 shadow-[0_0_15px_rgba(250,204,21,0.5)] animate-scan-line opacity-0 group-hover/btn:opacity-100 placeholder-opacity-0" />
+                </button>
+
+                <div className="flex items-center gap-4 text-sm text-muted-foreground font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <Zap className="w-4 h-4 text-yellow-500" />
+                    <span>AI Enhanced</span>
+                  </div>
+                  <div className="w-1 h-1 rounded-full bg-zinc-600" />
+                  <div className="flex items-center gap-1.5">
+                    <ScanLine className="w-4 h-4 text-indigo-500" />
+                    <span>Instant Analysis</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -229,7 +148,7 @@ interface TipCardProps {
 function TipCard({ number, title, description, gradient, delay }: TipCardProps) {
   return (
     <div
-      className="group p-6 rounded-2xl bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 animate-slide-up hover:border-indigo-300 dark:hover:border-indigo-700"
+      className="group p-6 rounded-2xl glass-card hover:-translate-y-1 transition-all duration-300 animate-slide-up hover:border-primary/50"
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="flex items-start gap-4">
@@ -240,8 +159,8 @@ function TipCard({ number, title, description, gradient, delay }: TipCardProps) 
           </div>
         </div>
         <div>
-          <h4 className="font-black text-slate-900 dark:text-white text-base mb-2 tracking-tight">{title}</h4>
-          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">{description}</p>
+          <h4 className="font-black text-foreground text-base mb-2 tracking-tight">{title}</h4>
+          <p className="text-sm text-muted-foreground leading-relaxed font-medium">{description}</p>
         </div>
       </div>
     </div>

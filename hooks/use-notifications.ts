@@ -75,6 +75,13 @@ export function useNotifications() {
                         if (token) {
                             console.log("FCM Token:", token)
                             setFcmToken(token)
+
+                            // Save token to backend
+                            await fetch("/api/fcm", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ token })
+                            })
                         }
                     } catch (err) {
                         console.error("Error getting FCM token:", err)

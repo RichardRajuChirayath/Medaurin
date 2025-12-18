@@ -1,48 +1,177 @@
-"use client"
+"use client";
 
-import { signIn, signOut, useSession } from "next-auth/react"
-import { User, LogOut, History, Loader2 } from "lucide-react"
-import { useState } from "react"
+import { useAuth } from "@/components/auth-provider";
+import { User, LogOut, History, Loader2, Phone, Receipt, Shield } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+
+// Generate deterministic gradient from email hash
+function generateGradient(input: string = "user") {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+        hash = input.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = Math.abs(hash % 360);
+    return `linear-gradient(135deg, hsl(${h}, 80%, 60%), hsl(${(h + 60) % 360}, 80%, 60%))`;
+}
 
 export function AuthButton() {
-    const { data: session, status } = useSession()
-    const [showMenu, setShowMenu] = useState(false)
+    const { user, loading, logout } = useAuth();
+    const [showMenu, setShowMenu] = useState(false);
 
-    if (status === "loading") {
+    // Normalize
+    const u = (user || {}) as any;
+
+    // ---------------------------
+    // DISPLAY NAME LOGIC
+    // ---------------------------
+    const emailName = u.email ? u.email.split("@")[0] : null;
+
+    const displayName = emailName || u.phoneNumber || "Member";
+    const subInfo = u.email || u.phoneNumber || "Verified User";
+
+    // ---------------------------
+    // STATUS DOT SYSTEM
+    // ---------------------------
+    const [status, setStatus] = useState<"online" | "idle" | "away">("online");
+    const lastActivityRef = useRef(Date.now())
+
+    useEffect(() => {
+        const updateActivity = () => {
+            lastActivityRef.current = Date.now()
+        }
+        window.addEventListener("mousemove", updateActivity);
+        window.addEventListener("keydown", updateActivity);
+
+        const interval = setInterval(() => {
+            const diff = Date.now() - lastActivityRef.current;
+            if (diff < 30000) setStatus("online");
+            else if (diff < 120000) setStatus("idle");
+            else setStatus("away");
+        }, 5000);
+
+        return () => {
+            window.removeEventListener("mousemove", updateActivity);
+            window.removeEventListener("keydown", updateActivity);
+            clearInterval(interval);
+        };
+    }, []); // Empty deps - we use ref, not state
+
+    const statusColor =
+        status === "online"
+            ? "bg-green-500"
+            : status === "idle"
+                ? "bg-yellow-500"
+                : "bg-red-500";
+
+    // ---------------------------
+    // BADGES
+    // ---------------------------
+    const badge =
+        u.createdAt
+            ? (Date.now() - new Date(u.createdAt).getTime()) / 86400000 < 7
+                ? "🆕 New User"
+                : emailName?.length > 12
+                    ? "🔥 Power User"
+                    : "⭐ Verified"
+            : "⭐ Verified";
+
+    // ---------------------------
+    // DROPDOWN ANIMATION
+    // ---------------------------
+    const dropdownAnimation =
+        "transition-all duration-300 origin-top-right scale-100 animate-[fadeIn_0.15s_ease-out]";
+
+    // ---------------------------
+    // KEYBOARD SHORTCUTS
+    // ---------------------------
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.shiftKey && e.key === "M") setShowMenu((s) => !s);
+            if (e.shiftKey && e.key === "L") logout();
+            if (e.shiftKey && e.key === "P") window.location.href = "/profile";
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    }, [logout]);
+
+    // ---------------------------
+    // KONAMI EASTER EGG
+    // ---------------------------
+    useEffect(() => {
+        const sequence = [
+            "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
+            "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a",
+        ];
+        let pos = 0;
+
+        const check = (e: KeyboardEvent) => {
+            if (e.key === sequence[pos]) {
+                pos++;
+                if (pos === sequence.length) {
+                    document.body.classList.add("konami-glow");
+                    setTimeout(() => document.body.classList.remove("konami-glow"), 3000);
+                    pos = 0;
+                }
+            } else pos = 0;
+        };
+
+        window.addEventListener("keydown", check);
+        return () => window.removeEventListener("keydown", check);
+    }, []);
+
+    // ---------------------------
+    // LOADING STATE
+    // ---------------------------
+    if (loading) {
         return (
             <div className="p-3 rounded-xl bg-white/60 dark:bg-slate-800/60">
                 <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
             </div>
-        )
+        );
     }
 
-    if (session?.user) {
+    // ---------------------------
+    // LOGGED-IN UI
+    // ---------------------------
+    if (user) {
+        const avatarBg = generateGradient(u.email || u.phoneNumber || "user");
+
         return (
-            <div className="relative">
+            <div className="relative group">
                 <button
                     onClick={() => setShowMenu(!showMenu)}
-                    className="flex items-center gap-3 p-3 rounded-xl backdrop-blur-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80 border border-slate-200/50 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-purple-500 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    className="flex items-center gap-3 p-3 rounded-xl backdrop-blur-xl
+                     bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80
+                     border border-slate-200/50 dark:border-slate-700/50 transition-all
+                     shadow-lg hover:shadow-xl"
                 >
-                    {session.user.image ? (
-                        <img
-                            src={session.user.image}
-                            alt={session.user.name || "User"}
-                            className="w-8 h-8 rounded-full border-2 border-indigo-500"
-                        />
-                    ) : (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                            <User className="w-5 h-5 text-white" />
-                        </div>
-                    )}
+                    <div
+                        className="relative w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                        style={{ background: avatarBg }}
+                    >
+                        {displayName.charAt(0).toUpperCase()}
+
+                        {/* STATUS DOT */}
+                        <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border border-white ${statusColor}`} />
+                    </div>
+
                     <div className="text-left hidden md:block">
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">
-                            {session.user.name || "User"}
+                        <p className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            {displayName}
+                            <span className="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-lg">
+                                {badge}
+                            </span>
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {session.user.email}
-                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{subInfo}</p>
                     </div>
                 </button>
+
+                {/* Hover analytics card */}
+                <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 hidden group-hover:flex
+                        bg-black/80 text-white text-xs px-3 py-2 rounded-xl backdrop-blur-lg">
+                    Active: {status} · Last: {Math.floor((Date.now() - lastActivityRef.current) / 1000)}s ago
+                </div>
 
                 {showMenu && (
                     <>
@@ -50,76 +179,91 @@ export function AuthButton() {
                             className="fixed inset-0 z-40"
                             onClick={() => setShowMenu(false)}
                         />
-                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-scale-in">
+
+                        <div
+                            className={`absolute right-0 mt-2 w-72 bg-white dark:bg-slate-800 
+                          rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700
+                          overflow-hidden z-50 p-2 ${dropdownAnimation}`}
+                        >
                             <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-                                <p className="font-bold text-slate-900 dark:text-white">
-                                    {session.user.name}
-                                </p>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    {session.user.email}
-                                </p>
+                                <p className="font-bold text-slate-900 dark:text-white">{displayName}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{subInfo}</p>
                             </div>
-                            <div className="p-2">
-                                <a
-                                    href="/profile"
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                    onClick={() => setShowMenu(false)}
-                                >
-                                    <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
-                                        Profile Settings
-                                    </span>
-                                </a>
-                                <a
-                                    href="/medications"
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                    onClick={() => setShowMenu(false)}
-                                >
-                                    <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                    </svg>
-                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
-                                        My Medications
-                                    </span>
-                                </a>
-                                <a
-                                    href="/history"
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                    onClick={() => setShowMenu(false)}
-                                >
-                                    <History className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
-                                        View History
-                                    </span>
-                                </a>
-                                <button
-                                    onClick={() => {
-                                        setShowMenu(false)
-                                        signOut()
-                                    }}
-                                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left"
-                                >
-                                    <LogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
-                                    <span className="font-semibold text-red-600 dark:text-red-400">
-                                        Sign Out
-                                    </span>
-                                </button>
-                            </div>
+
+                            <Link
+                                href="/caregiver"
+                                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                            >
+                                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
+                                    <Shield className="w-4 h-4" />
+                                </div>
+                                <div className="text-left">
+                                    <p className="font-bold text-slate-900 dark:text-white text-sm">Caregiver Portal</p>
+                                    <p className="text-xs text-slate-500">Monitor family health</p>
+                                </div>
+                            </Link>
+
+                            <a
+                                href="/profile"
+                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
+                            >
+                                <User className="w-5 h-5 text-purple-600" />
+                                Profile Settings
+                            </a>
+
+                            <a
+                                href="/medications"
+                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
+                            >
+                                <History className="w-5 h-5 text-emerald-600" />
+                                My Medications
+                            </a>
+
+                            <a
+                                href="/expenses"
+                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
+                            >
+                                <Receipt className="w-5 h-5 text-amber-600" />
+                                Expense Tracker
+                            </a>
+
+                            <a
+                                href="/history"
+                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
+                            >
+                                <History className="w-5 h-5 text-indigo-600" />
+                                View History
+                            </a>
+
+                            <button
+                                onClick={logout}
+                                className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
+                            >
+                                <LogOut className="w-5 h-5 text-red-600" />
+                                <span className="text-red-600">Sign Out</span>
+                            </button>
                         </div>
                     </>
                 )}
             </div>
-        )
+        );
     }
 
+    // ---------------------------
+    // LOGGED OUT UI
+    // ---------------------------
     return (
-        <button
-            onClick={() => signIn("google")}
-            className="group relative px-6 py-3 rounded-xl backdrop-blur-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80 border border-slate-200/50 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-purple-500 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+        <Link
+            href="/login"
+            className="group relative px-6 py-3 rounded-xl backdrop-blur-xl bg-white/60 
+                 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80
+                 border border-slate-200/50 dark:border-slate-700/50 transition-all
+                 shadow-lg hover:shadow-xl flex items-center gap-2"
         >
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity" />
-            <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            <span className="font-bold text-slate-900 dark:text-white">Sign In</span>
-        </button>
-    )
+            <Phone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <span className="font-bold text-slate-900 dark:text-white">
+                Continue with Phone
+            </span>
+        </Link>
+    );
 }

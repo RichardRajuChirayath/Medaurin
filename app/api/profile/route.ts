@@ -1,41 +1,38 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getSession } from "@/lib/session"
 import { prisma } from "@/lib/prisma"
+import { cookies } from "next/headers"
 
 // GET - Fetch user profile
 export async function GET() {
     try {
-        const session = await getServerSession(authOptions)
+        const session = await getSession()
 
-        if (!session?.user?.email) {
+        if (!session?.userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        // Fetch user with raw SQL to get new fields
-        const users = await prisma.$queryRaw`
-            SELECT id, name, username, email, image, allergies, conditions, "createdAt"
-            FROM "User"
-            WHERE email = ${session.user.email}
-            LIMIT 1
-        ` as any[]
+        const user = await prisma.user.findUnique({
+            where: { id: session.userId },
+            select: {
+                id: true,
+                name: true,
+                username: true,
+                avatarUrl: true,
+                email: true,
+                phoneNumber: true,
+                allergies: true,
+                conditions: true,
+                notificationSettings: true,
+                createdAt: true,
+            }
+        })
 
-        if (!users || users.length === 0) {
+        if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 })
         }
 
-        const user = users[0]
-
-        return NextResponse.json({
-            id: user.id,
-            name: user.name,
-            username: user.username,
-            email: user.email,
-            image: user.image,
-            allergies: user.allergies || [],
-            conditions: user.conditions || [],
-            createdAt: user.createdAt
-        })
+        return NextResponse.json(user)
     } catch (error) {
         console.error("Error fetching profile:", error)
         return NextResponse.json({ error: "Internal server error" }, { status: 500 })
@@ -45,63 +42,77 @@ export async function GET() {
 // PUT - Update user profile
 export async function PUT(request: Request) {
     try {
-        const session = await getServerSession(authOptions)
+        const session = await getSession()
 
-        if (!session?.user?.email) {
+        if (!session?.userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
         const body = await request.json()
-        const { username, allergies, conditions } = body
+        const {
+            name,
+            username,
+            avatarUrl,
+            allergies,
+            conditions,
+            notificationSettings
+        } = body
 
-        console.log('[Profile] Update request:', { username, allergies, conditions })
-
-        // Check if username is already taken (if provided)
+        // Validate username uniqueness if provided
         if (username) {
-            const existing = await prisma.$queryRaw`
-                SELECT email FROM "User" WHERE username = ${username} LIMIT 1
-            ` as any[]
-
-            if (existing.length > 0 && existing[0].email !== session.user.email) {
-                return NextResponse.json(
-                    { error: "Username already taken" },
-                    { status: 400 }
-                )
+            const existing = await prisma.user.findUnique({
+                where: { username }
+            })
+            if (existing && existing.id !== session.userId) {
+                return NextResponse.json({ error: "Username already taken" }, { status: 400 })
             }
         }
 
-        // Update using raw SQL
-        await prisma.$executeRaw`
-            UPDATE "User"
-            SET 
-                username = ${username || null},
-                allergies = ${allergies || []},
-                conditions = ${conditions || []}
-            WHERE email = ${session.user.email}
-        `
-
-        console.log('[Profile] Update successful')
-
-        // Fetch updated user
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
+        const user = await prisma.user.update({
+            where: { id: session.userId },
+            data: {
+                name,
+                username,
+                avatarUrl,
+                allergies,
+                conditions,
+                notificationSettings,
+            },
             select: {
                 id: true,
                 name: true,
+                username: true,
+                avatarUrl: true,
                 email: true,
-                image: true,
+                phoneNumber: true,
+                allergies: true,
+                conditions: true,
+                notificationSettings: true,
                 createdAt: true,
             }
         })
 
-        return NextResponse.json({
-            ...user,
-            username,
-            allergies: allergies || [],
-            conditions: conditions || [],
-        })
+        return NextResponse.json(user)
     } catch (error: any) {
         console.error("[Profile] Error updating:", error.message)
         return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 })
+    }
+}
+
+// DELETE - Delete account
+export async function DELETE() {
+    try {
+        const session = await getSession()
+        if (!session?.userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+        await prisma.user.delete({ where: { id: session.userId } })
+
+        // Clear session cookie
+        const cookieStore = await cookies()
+        cookieStore.delete("session_token")
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        return NextResponse.json({ error: "Failed to delete account" }, { status: 500 })
     }
 }

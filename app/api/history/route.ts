@@ -1,31 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getSession } from "@/lib/session"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions)
+        const session = await getSession()
 
-        if (!session || !session.user?.email) {
+        if (!session?.userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
         const { medicines, status, score, analysisType, interactions, recommendations } = await request.json()
 
-        // Find user by email
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
-        })
-
-        if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 })
-        }
-
         // Save analysis to database
         const analysis = await prisma.analysis.create({
             data: {
-                userId: user.id,
+                userId: session.userId as string,
                 medicines,
                 status,
                 score,
@@ -44,24 +34,15 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions)
+        const session = await getSession()
 
-        if (!session || !session.user?.email) {
+        if (!session?.userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
-        // Find user by email
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
-        })
-
-        if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 })
         }
 
         // Get user's analysis history
         const analyses = await prisma.analysis.findMany({
-            where: { userId: user.id },
+            where: { userId: session.userId as string },
             orderBy: { createdAt: 'desc' },
             take: 50, // Limit to last 50 analyses
         })

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
 import { History, Calendar, Shield, AlertTriangle, CheckCircle, ArrowLeft, Trash2 } from "lucide-react"
 import Link from "next/link"
@@ -18,22 +18,22 @@ interface Analysis {
 }
 
 export default function HistoryPage() {
-    const { data: session, status } = useSession()
+    const { user, loading } = useAuth()
     const router = useRouter()
     const [analyses, setAnalyses] = useState<Analysis[]>([])
-    const [loading, setLoading] = useState(true)
+    const [dataLoading, setDataLoading] = useState(true)
 
     useEffect(() => {
-        if (status === "unauthenticated") {
+        if (!loading && !user) {
             router.push("/")
         }
-    }, [status, router])
+    }, [loading, user, router])
 
     useEffect(() => {
-        if (session) {
+        if (user) {
             fetchHistory()
         }
-    }, [session])
+    }, [user])
 
     const fetchHistory = async () => {
         try {
@@ -45,11 +45,11 @@ export default function HistoryPage() {
         } catch (error) {
             console.error("Failed to fetch history:", error)
         } finally {
-            setLoading(false)
+            setDataLoading(false)
         }
     }
 
-    if (status === "loading" || loading) {
+    if (loading || dataLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-100 via-indigo-100 to-purple-100 dark:from-slate-950 dark:via-indigo-950/90 dark:to-purple-950/80">
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent" />
@@ -57,7 +57,7 @@ export default function HistoryPage() {
         )
     }
 
-    if (!session) {
+    if (!user) {
         return null
     }
 

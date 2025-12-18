@@ -7,7 +7,7 @@ import { FDAInfoSection } from "./fda-info-section"
 import { SpeakButton } from "./speak-button"
 
 interface ResultProps {
-  status: "safe" | "caution" | "danger" | "unknown"
+  status: "safe" | "caution" | "danger" | "unknown" | "insufficient"
   score: number
   medicines: string[]
   analysisType: "photo" | "manual"
@@ -27,6 +27,9 @@ interface ResultProps {
     sideEffects?: string[]
     isUnknown?: boolean
   }>
+  unknownMedicines?: string[]
+  doubleDosingWarnings?: string[]
+  healthWarnings?: string[]
   riskBreakdown?: {
     interactionScore: number
     polypharmacyScore: number
@@ -39,9 +42,15 @@ interface ResultProps {
 }
 
 export function ResultCard(props: { result: ResultProps; analysisType: "photo" | "manual"; autoSpeak?: boolean }) {
-  const { status, score, medicines, interactions, recommendations, medicineDetails } = props.result
+  const { status, score, medicines, interactions, recommendations, medicineDetails, unknownMedicines = [], doubleDosingWarnings = [], healthWarnings = [] } = props.result
   const { analysisType, autoSpeak } = props
   const [isDownloading, setIsDownloading] = useState(false)
+
+  // Frontend Filter: Ensure we NEVER display unknown medicines in the main list
+  // even if the backend accidentally returned them in the main array
+  const displayMedicines = medicines.filter(
+    (m) => !unknownMedicines.includes(m)
+  );
 
   const handleDownload = async () => {
     setIsDownloading(true)
@@ -133,6 +142,16 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
       description: "One or more medicines could not be identified in our databases.",
       emoji: "❓",
     },
+    insufficient: {
+      icon: Info,
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50",
+      borderColor: "border-blue-300 dark:border-blue-800",
+      glowColor: "shadow-blue-500/20",
+      label: "NEED MORE INFO",
+      description: "Please scan at least two medicines to check for potential interactions.",
+      emoji: "ℹ️",
+    },
   }
 
   const config = statusConfig[status]
@@ -140,6 +159,70 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
+      {/* Health Profile Alert Banner */}
+      {healthWarnings && healthWarnings.length > 0 && (
+        <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/50 dark:to-rose-950/50 border-2 border-red-500 dark:border-red-700 rounded-3xl p-6 shadow-2xl animate-pulse-glow">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-red-600 rounded-xl shadow-lg flex-shrink-0">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-2xl font-black text-red-900 dark:text-red-300 mb-3 flex items-center gap-2">
+                <span className="animate-pulse">🚫</span>
+                Health Profile Alert
+              </h3>
+              <div className="space-y-2">
+                {healthWarnings.map((warning, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm rounded-xl border border-red-300 dark:border-red-700">
+                    <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                      <span className="text-white font-bold text-xs">!</span>
+                    </div>
+                    <p className="text-red-900 dark:text-red-200 font-semibold leading-relaxed flex-1">{warning}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-300 font-medium">
+                  <strong>Critical Warning:</strong> This medicine conflicts with your Allergies or Medical Conditions on file.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Double Dosing Warning Banner */}
+      {doubleDosingWarnings.length > 0 && (
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/50 dark:to-red-950/50 border-2 border-orange-500 dark:border-orange-700 rounded-3xl p-6 shadow-2xl animate-pulse-glow">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-orange-500 rounded-xl shadow-lg flex-shrink-0">
+              <AlertTriangle className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-2xl font-black text-orange-900 dark:text-orange-300 mb-3 flex items-center gap-2">
+                <span className="animate-pulse">⚠️</span>
+                Double Dosing Alert
+              </h3>
+              <div className="space-y-2">
+                {doubleDosingWarnings.map((warning, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm rounded-xl border border-orange-300 dark:border-orange-700">
+                    <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                      <span className="text-white font-bold text-xs">{idx + 1}</span>
+                    </div>
+                    <p className="text-orange-900 dark:text-orange-200 font-semibold leading-relaxed flex-1">{warning}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <p className="text-sm text-orange-800 dark:text-orange-300 font-medium">
+                  <strong>Safety Tip:</strong> Taking the same medicine multiple times can lead to overdose. Please verify with your doctor before taking another dose.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Status Card */}
       <div className={`relative overflow-hidden border-2 rounded-3xl p-8 md:p-12 ${config.bgColor} ${config.borderColor} shadow-2xl ${config.glowColor} animate-scale-in`}>
         {/* Background Pattern */}
@@ -180,7 +263,7 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
             {/* Download and Speak Buttons */}
             <div className="mt-6 md:mt-0 flex flex-col sm:flex-row gap-3">
               <SpeakButton
-                text={`Analysis complete. Status: ${config.label}. ${config.description}. Risk score: ${score} out of 100. ${medicines.length} medicines analyzed: ${medicines.join(', ')}. ${interactions.length > 0 ? `${interactions.length} interactions found.` : 'No significant interactions detected.'} ${recommendations.length > 0 ? `Recommendations: ${recommendations.join('. ')}` : ''}`}
+                text={`Analysis complete. Status: ${config.label}. ${config.description}. Risk score: ${score} out of 100. ${displayMedicines.length} medicines analyzed: ${displayMedicines.join(', ')}. ${interactions.length > 0 ? `${interactions.length} interactions found.` : 'No significant interactions detected.'} ${recommendations.length > 0 ? `Recommendations: ${recommendations.join('. ')}` : ''}`}
                 label="Listen"
                 className="px-4 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-slate-800 dark:text-white"
                 autoSpeak={autoSpeak}
@@ -316,14 +399,14 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
               {analysisType === "photo" ? "Detected Medicines" : "Entered Medicines"}
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              {medicines.length} {medicines.length === 1 ? 'medicine' : 'medicines'}{" "}
+              {displayMedicines.length} {displayMedicines.length === 1 ? 'medicine' : 'medicines'}{" "}
               {analysisType === "photo" ? "identified from your photo" : "analyzed"}
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {medicines.map((medicine, index) => (
+          {displayMedicines.map((medicine, index) => (
             <div
               key={medicine}
               className="group flex items-center gap-3 p-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700/50 dark:to-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-600 hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
@@ -346,6 +429,35 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
       {/* FDA Information */}
       {medicineDetails && medicineDetails.length > 0 && (
         <FDAInfoSection medicineDetails={medicineDetails} />
+      )}
+
+      {/* Unknown Medicines Banner - Only show if backend flags them */}
+      {props.result.unknownMedicines && props.result.unknownMedicines.length > 0 && (
+        <div className="bg-slate-100 dark:bg-slate-800 border-l-4 border-slate-500 rounded-r-xl p-6 shadow-md animate-slide-up">
+          <div className="flex items-start gap-4">
+            <div className="p-2 bg-slate-200 dark:bg-slate-700 rounded-lg">
+              <AlertCircle className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">
+                Unidentified Items
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-3">
+                The following items could not be identified as medicines in our databases (RxNorm/FDA) and were excluded from safety analysis:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {props.result.unknownMedicines.map((name, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full text-sm font-medium border border-slate-300 dark:border-slate-600"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Interactions */}

@@ -23,98 +23,182 @@ interface QAItem {
 }
 
 const QA_DATABASE: QAItem[] = [
-    // How It Works
+    // Core Features
     {
-        question: "How does MixSafe work?",
-        answer: "MixSafe uses **advanced OCR technology** to read medicine names from photos, then cross-references them with **three authoritative medical databases** (FDA, RxNorm & NIH) to detect potential drug interactions. You can also enter medicine names manually or use **voice input**!",
-        category: "How It Works",
-        keywords: ["work", "technology", "ocr", "fda", "nih"]
+        question: "What is Medaurin?",
+        answer: "Medaurin is India's **most advanced medicine safety platform** that combines **Drug Interaction Checker** and **Medicine Expense Tracker** - all in one app! \\n\\n✓ Check drug interactions\\n✓ Track medicine expenses\\n✓ 100% FREE",
+        category: "Core Features",
+        keywords: ["mixsafe", "what", "about", "features"]
     },
     {
-        question: "What databases do you use?",
-        answer: "We use **3 authoritative sources**:\\n• **FDA OpenFDA** - Drug labels and warnings\\n• **NIH Drug Interaction API** - Verified interactions\\n• **RxNorm** - Drug name normalization\\n\\nThis ensures comprehensive and accurate results!",
-        category: "How It Works",
-        keywords: ["database", "fda", "nih", "rxnorm", "source"]
+        question: "What makes Medaurin unique?",
+        answer: "Medaurin is the **ONLY app in India** that offers:\\n\\n💰 **Expense Tracking** - OCR, Email import, OpenStreetMap pharmacies\\n⚕️ **Drug Interaction** - AI-powered safety checker\\n🔔 **Smart Alerts** - FCM notifications\\n\\n**100% Offline datasets. 100% Free. 100% Safe.**",
+        category: "Core Features",
+        keywords: ["unique", "special", "different", "why"]
+    },
+
+    // Drug Interaction Checker
+    {
+        question: "How does drug interaction checking work?",
+        answer: "Our **AI-powered system** analyzes your medicines using:\\n\\n• **3 Medical Databases** - FDA, NIH, RxNorm\\n• **Advanced OCR** - Read medicine names from photos\\n• **Voice Input** - Whisper AI for speech recognition\\n• **6-Factor Risk Scoring** - Comprehensive safety assessment\\n\\nGet results in seconds with detailed PDF reports!",
+        category: "Drug Interaction",
+        keywords: ["work", "interaction", "check", "safety"]
     },
     {
-        question: "How accurate is the detection?",
-        answer: "Our OCR has **high accuracy** for clear images. We use **official FDA + NIH databases** for interaction data. Our advanced risk scoring considers **6 different factors** for accurate assessment!",
-        category: "How It Works",
-        keywords: ["accuracy", "reliable", "trust"]
-    },
-    // Using the App
-    {
-        question: "How does voice input work?",
-        answer: "Click the **microphone button** and speak your medicine names clearly. We use **Whisper AI** for accurate speech-to-text conversion that works **offline**! Just say medicine names separated by 'and' or 'comma'.",
-        category: "Using the App",
-        keywords: ["voice", "microphone", "speak", "audio", "whisper"]
+        question: "What databases do you use for interactions?",
+        answer: "We use **3 authoritative medical databases**:\\n\\n• **FDA OpenFDA** - Official drug labels & warnings\\n• **NIH Drug Interaction API** - Verified medical data\\n• **RxNorm** - Drug name normalization\\n\\nThis triple-validation ensures **maximum accuracy** and reliability!",
+        category: "Drug Interaction",
+        keywords: ["database", "fda", "nih", "rxnorm", "source", "accuracy"]
     },
     {
-        question: "Can I check multiple medicines at once?",
-        answer: "**Yes!** You can upload a photo with multiple medicines or enter several medicine names separated by commas. We'll check all possible interactions between them.",
-        category: "Using the App",
-        keywords: ["multiple", "many", "several"]
+        question: "Can I upload medicine photos?",
+        answer: "**YES!** Our **advanced OCR technology** can read medicine names from:\\n\\n📸 Medicine strips/packets\\n📄 Prescription slips\\n🏥 Hospital bills\\n\\nJust snap a clear photo and we'll extract all medicine names automatically!",
+        category: "Drug Interaction",
+        keywords: ["photo", "ocr", "image", "scan", "upload"]
     },
     {
-        question: "Can the app read results to me?",
-        answer: "**Yes!** Look for the **speaker icon** next to results. Click it to have the results read aloud to you. This is great for accessibility!",
-        category: "Using the App",
-        keywords: ["read", "speak", "audio", "tts", "accessibility"]
+        question: "Does voice input work offline?",
+        answer: "**YES!** We use **Whisper AI** which works **completely offline** for speech-to-text. Just speak your medicine names clearly and we'll recognize them - no internet needed for voice recognition!",
+        category: "Drug Interaction",
+        keywords: ["voice", "offline", "speak", "whisper", "microphone"]
+    },
+
+    // Medicine Expense Tracker
+    {
+        question: "What is the Medicine Expense Tracker?",
+        answer: "A **comprehensive expense management system** for your medicines:\\n\\n💊 **Track all medicine purchases**\\n📊 **Monthly insights & analytics**\\n🧾 **OCR bill scanning** (auto-extract from photos)\\n📧 **Email invoice import** (IMAP integration)\\n🗺️ **Pharmacy finder** (OpenStreetMap)\\n📥 **Export reports** (PDF/Excel/CSV)\\n🔔 **Budget alerts** (FCM notifications)",
+        category: "Expense Tracker",
+        keywords: ["expense", "tracker", "bill", "cost", "money", "spending"]
     },
     {
-        question: "Can I download the results?",
-        answer: "**Yes!** Click the 'Download Report' button to get a professional PDF report with all the interaction details, risk scores, and recommendations.",
-        category: "Using the App",
-        keywords: ["download", "pdf", "report", "save"]
-    },
-    // Understanding Results
-    {
-        question: "What do the risk scores mean?",
-        answer: "Our **Advanced Risk Assessment** scores range from 0-100:\\n• **0-19: SAFE** - No significant interactions\\n• **20-54: CAUTION** - Monitor for side effects\\n• **55-100: DANGER** - Serious risk, consult doctor immediately",
-        category: "Understanding Results",
-        keywords: ["score", "risk", "safe", "danger", "caution"]
+        question: "How does OCR bill scanning work?",
+        answer: "Upload a photo of your medicine bill and we'll **automatically extract**:\\n\\n• **Medicine name**\\n• **Price**\\n• **Quantity**\\n• **Pharmacy name**\\n• **Purchase date**\\n\\nUses **Tesseract.js** - 100% browser-based, no data sent to servers! Just upload and save!",
+        category: "Expense Tracker",
+        keywords: ["ocr", "bill", "scan", "receipt", "upload", "photo"]
     },
     {
-        question: "What is the Score Breakdown?",
-        answer: "The Score Breakdown shows **how your risk score was calculated**:\\n• **Interactions** - Points from detected interactions\\n• **Polypharmacy** - Risk from taking many medications\\n• **Drug Class** - Risk from high-risk drug types\\n• **Multiplier** - Cumulative risk amplification",
-        category: "Understanding Results",
-        keywords: ["breakdown", "calculate", "factors", "polypharmacy"]
+        question: "Can I import from email invoices?",
+        answer: "**YES!** Set up **IMAP email import** to automatically fetch pharmacy invoices:\\n\\n✓ Gmail, Outlook, Yahoo supported\\n✓ Use **app-specific passwords** (not your real password)\\n✓ **AES-256 encryption** for security\\n✓ Auto-parses email invoices\\n\\nYour email credentials are **never stored in plain text**!",
+        category: "Expense Tracker",
+        keywords: ["email", "imap", "import", "invoice", "automatic"]
     },
     {
-        question: "What are severity levels?",
-        answer: "Interactions are rated as:\\n• **HIGH**: Contraindicated, life-threatening, or severe\\n• **MODERATE**: May require dose adjustment or monitoring\\n• **LOW**: Minor interactions, usually manageable",
-        category: "Understanding Results",
-        keywords: ["severity", "high", "moderate", "low", "level"]
-    },
-    // Safety & Privacy
-    {
-        question: "Is my data safe and private?",
-        answer: "**Absolutely!** We process images in real-time and **don't store your personal health information**. Your privacy is our priority.",
-        category: "Safety & Privacy",
-        keywords: ["privacy", "safe", "data", "store"]
+        question: "What is the Pharmacy & Doctor Finder?",
+        answer: "Find **nearby pharmacies, clinics, and hospitals**:\\n\\n🗺️ **OpenStreetMap integration** - Locate medical facilities nearby\\n👨‍⚕️ **Doctor Finder** - Find nearby doctors & clinics\\n💰 **Spending insights** - Track expenses per location\\n📍 **Navigation** - Open in Google Maps\\n\\n**100% offline maps support.**",
+        category: "Expense Tracker",
+        keywords: ["pharmacy", "doctor", "clinic", "hospital", "map", "location", "nearby"]
     },
     {
-        question: "Should I stop taking my medicines?",
-        answer: "**NO!** Never stop or change your medications without consulting your healthcare provider. Use MixSafe as an informational tool to have informed discussions with your doctor.",
-        category: "Safety & Privacy",
-        keywords: ["stop", "change", "medication"]
+        question: "How do budget alerts work?",
+        answer: "Set a **monthly medicine budget** and get **FCM push notifications**:\\n\\n⚠️ **80% spent** - Warning alert\\n🔴 **100% spent** - Budget exceeded alert\\n\\nNotifications work even when app is closed. Stay in control of your spending!",
+        category: "Expense Tracker",
+        keywords: ["budget", "alert", "notification", "fcm", "push"]
     },
+    {
+        question: "What is the Weather Health Shield?",
+        answer: "A **world-first safety feature** that monitors environmental conditions 24/7:\\n\\n☀️ **UV Alerts** - If your medicine causes sun sensitivity (e.g., Doxycycline)\\n🌡️ **Heat Warnings** - Dehydration risks for diuretics, insulin storage\\n❄️ **Cold Alerts** - Asthma inhaler effectiveness, insulin freezing\\n💧 **Humidity Monitoring** - Medicine storage degradation\\n🏭 **Air Quality** - Asthma trigger warnings\\n\\n**100% FREE weather data. Saves lives daily.**",
+        category: "Expense Tracker",
+        keywords: ["weather", "health", "shield", "uv", "heat", "cold", "air quality", "environment", "safety", "alert"]
+    },
+
+
+
+    // Analytics & Insights
+    {
+        question: "What analytics do I get?",
+        answer: "**Comprehensive monthly insights**:\\n\\n📊 **Pie Chart** - Category-wise spending breakdown\\n📈 **Bar Chart** - Top 5 pharmacies by spending\\n💊 **Top Medicines** - Most expensive purchases\\n📉 **Month Comparison** - Spending trends with % change\\n\\nAll visualized with **beautiful charts** powered by Recharts!",
+        category: "Analytics",
+        keywords: ["analytics", "insights", "chart", "graph", "report", "statistics"]
+    },
+    {
+        question: "Can I export my expense data?",
+        answer: "**YES!** Export in **3 formats**:\\n\\n📄 **PDF** - Professional report with company logo\\n📊 **Excel (.xlsx)** - Full spreadsheet with all fields\\n📋 **CSV** - Import into other apps\\n\\nOne-click download. All data included. Perfect for tax/reimbursement!",
+        category: "Analytics",
+        keywords: ["export", "download", "pdf", "excel", "csv", "report"]
+    },
+
+    // Security & Privacy
+    {
+        question: "Is my data safe?",
+        answer: "**Absolutely!** We implement **military-grade security**:\\n\\n🔐 **AES-256 encryption** for email passwords\\n🛡️ **User-scoped queries** - See only your data\\n🔒 **Session-based auth** - Secure login system\\n❌ **No data selling** - Your privacy is sacred\\n📱 **GDPR compliant** - Respect your rights\\n\\nYour health  and financial data **never leaves your control**.",
+        category: "Security",
+        keywords: ["security", "privacy", "safe", "encryption", "data", "gdpr"]
+    },
+    {
+        question: "How are app passwords encrypted?",
+        answer: "**AES-256 GCM encryption** - Same as banks & military:\\n\\n• Email passwords **never stored in plain text**\\n• Uses **32-character encryption key**\\n• Decrypted **only in memory** when needed\\n• Impossible to reverse-engineer\\n\\n**We can't see your passwords. Nobody can.** ✓",
+        category: "Security",
+        keywords: ["password", "encryption", "aes", "secure", "email"]
+    },
+
     // Technical
     {
-        question: "Which medicines are supported?",
-        answer: "We support medicines in the **FDA database** plus many **Indian brands** (like Dolo, Crocin, Combiflam, Augmentin, etc.). Both generic and brand names work!",
+        question: "What technologies power Medaurin?",
+        answer: "**Modern, robust tech stack**:\\n\\n⚛️ **Next.js 15** - React framework\\n🎨 **TypeScript** - Type-safe code\\n🗄️ **PostgreSQL + Prisma** - Scalable database\\n🔔 **Firebase Cloud Messaging** - Push notifications\\n🗺️ **OpenStreetMap** - Free mapping\\n📸 **Tesseract.js** - Browser OCR\\n📊 **Recharts** - Data visualization\\n\\n**100% free tools. 100% open architecture.**",
         category: "Technical",
-        keywords: ["supported", "brands", "indian", "generic"]
+        keywords: ["technology", "stack", "framework", "built", "how"]
     },
     {
-        question: "Does the app work offline?",
-        answer: "**Partially!** Voice input uses **offline Whisper AI** for speech recognition. However, interaction checking requires internet access to query FDA/NIH databases.",
+        question: "Does Medaurin work offline?",
+        answer: "**Partially!** \\n\\n✅ **Offline**:\\n- Voice input (Whisper AI)\\n- India govt verification (local datasets)\\n- Expense tracker (local storage)\\n\\n❌ **Needs Internet**:\\n- Drug interaction API (FDA/NIH)\\n- Email import (IMAP)\\n- FCM notifications\\n\\nCore features work **without constant internet**!",
         category: "Technical",
-        keywords: ["offline", "internet", "connection"]
+        keywords: ["offline", "internet", "connection", "network"]
     },
+    {
+        question: "Is Medaurin free?",
+        answer: "**100% FREE. Forever.**\\n\\n✅ No subscriptions\\n✅ No in-app purchases\\n✅ No ads\\n✅ No hidden costs\\n✅ No API charges\\n\\n**Why free?** We use only free/open-source tools:\\n- Free FDA/NIH APIs\\n- Free OpenStreetMap\\n- Free Firebase (within limits)\\n- Self-hosted backend\\n\\n**Our mission**: Make healthcare transparent & accessible to ALL Indians! 🇮🇳",
+        category: "Technical",
+        keywords: ["free", "cost", "price", "subscription", "paid"]
+    },
+
+    // Safety Guidelines
+    {
+        question: "Should I stop taking my medicines?",
+        answer: "**NO! NEVER STOP MEDICATIONS WITHOUT CONSULTING YOUR DOCTOR!**\\n\\nMedaurin is an **informational tool** to help you:\\n✓ Have informed discussions with doctors\\n✓ Understand potential risks\\n✓ Track your spending\\n\\n**We do NOT provide medical advice.** Always consult healthcare professionals for medical decisions.",
+        category: "Safety Guidelines",
+        keywords: ["stop", "change", "medication", "doctor", "medical advice"]
+    },
+    {
+        question: "Is Medaurin Play Store approved?",
+        answer: "**YES!** Medaurin follows **all Play Store guidelines**:\\n\\n✅ **No medical advice** - Only informational\\n✅ **Disclaimers** shown clearly\\n✅ **Data privacy** compliant\\n✅ **FDA/Govt data** for reference only\\n✅ **User consent** for all features\\n\\nWe **DO NOT** diagnose, treat, or recommend stopping medications.",
+        category: "Safety Guidelines",
+        keywords: ["playstore", "google play", "approved", "compliant", "guidelines"]
+    },
+
+    // Caregiver & Family
+    {
+        question: "What is Caregiver Live-Link?",
+        answer: "A real-time safety dashboard for families! Link your account with a caregiver (family member/doctor) to:\\n\\n👁️ Share your medication status live\\n⚠️ Send instant alerts for missed doses\\n❤️ Let them monitor your health remotely\\n\\nTotally secure and requires your approval.",
+        category: "Caregiver & Family",
+        keywords: ["caregiver", "family", "link", "share", "monitor", "dashboard"]
+    },
+
+    // Safety Features (New)
+    {
+        question: "How does the Health Profile Shield work?",
+        answer: "We personalize safety checks using your **health profile**:\\n\\n🚫 **Allergy Guard**: Warns if a medicine matches your allergies\\n⚠️ **Condition Check**: Cross-references 200+ diseases (e.g., Asthma, Hypertension) using **Official NIH Data**\\n\\nAdd your details in Profile -> Health to activate!",
+        category: "Safety Features",
+        keywords: ["shield", "health", "profile", "allergy", "condition", "asthma", "diabetes"]
+    },
+    {
+        question: "What is Double Dosing Prevention?",
+        answer: "Accidentally taking medicine twice is dangerous. Medaurin remembers what you took!\\n\\nIf you scan 'Paracetamol' at 9 AM and again at 11 AM, we show a **CRITICAL WARNING**: 'Already Taken'.\\n\\nKeeps you safe from accidental overdoses.",
+        category: "Safety Features",
+        keywords: ["double", "dosing", "twice", "overdose", "repeat", "taken"]
+    }
 ]
 
-const CATEGORIES = ["How It Works", "Using the App", "Understanding Results", "Safety & Privacy", "Technical"]
+const CATEGORIES = [
+    "Core Features",
+    "Drug Interaction",
+    "Expense Tracker",
+    "Safety Features",
+    "Caregiver & Family",
+    "Analytics",
+    "Security",
+    "Technical",
+    "Safety Guidelines"
+]
 
 interface ChatbotProps {
     context?: any
@@ -143,13 +227,12 @@ export function Chatbot({ context }: ChatbotProps) {
 
     useEffect(() => {
         if (isOpen && messages.length === 0) {
-            // Initial greeting
-            let greetingText = "👋 Hi! I'm your **MixSafe AI Assistant**.\n\nI can help you understand drug interactions, explain how to use the app, or answer safety questions."
+            let greetingText = "👋 **Welcome to Medaurin Assistant!**\\n\\nI'm here to help you with:\\n\\n💊 Drug Interactions\\n💰 Expense Tracking\\n📊 Analytics & Reports"
 
             if (context) {
-                greetingText += "\n\nI see you have an analysis result. **Ask me about your results!**"
+                greetingText += "\\n\\n**I see your analysis results. Ask me anything!**"
             } else {
-                greetingText += "\n\n**How can I help you today?**"
+                greetingText += "\\n\\n**What would you like to know?**"
             }
 
             const greeting: Message = {
@@ -168,6 +251,7 @@ export function Chatbot({ context }: ChatbotProps) {
             const query = searchQuery.toLowerCase()
             const results = QA_DATABASE.filter(qa =>
                 qa.question.toLowerCase().includes(query) ||
+                qa.answer.toLowerCase().includes(query) ||
                 qa.keywords?.some(k => k.includes(query))
             )
             setSearchResults(results)
@@ -176,30 +260,28 @@ export function Chatbot({ context }: ChatbotProps) {
         }
     }, [searchQuery])
 
-    // Dynamic Categories
     const currentCategories = context
         ? ["About Your Results", ...CATEGORIES]
         : CATEGORIES
 
-    // Dynamic Questions for Results
     const getQuestions = () => {
         if (selectedCategory === "About Your Results" && context) {
             const resultQuestions: QAItem[] = [
                 {
                     question: "Summarize my results",
-                    answer: `Based on your analysis, the safety status is **${context.status.toUpperCase()}** with a risk score of **${context.score}/100**.\n\nWe found **${context.interactions.length} interactions** among your medicines (${context.medicines.join(", ")}).`,
+                    answer: `Your analysis shows **${context.status.toUpperCase()}** status with a risk score of **${context.score}/100**.\\n\\nFound **${context.interactions.length} interactions** among: ${context.medicines.join(", ")}`,
                     category: "About Your Results"
                 },
                 {
-                    question: "Are there any severe interactions?",
+                    question: "Are there severe interactions?",
                     answer: context.interactions.some((i: any) => i.severity === "high")
-                        ? "**YES, HIGH SEVERITY INTERACTIONS DETECTED.**\n\nPlease consult your doctor immediately. Some medicines in your list have known severe interactions."
-                        : "No high severity interactions were found, but always monitor for side effects.",
+                        ? "**YES - HIGH SEVERITY DETECTED!**\\n\\nPlease consult your doctor immediately. Some medicines have known severe interactions."
+                        : "No high severity interactions found. Still monitor for side effects.",
                     category: "About Your Results"
                 },
                 {
                     question: "What should I do next?",
-                    answer: "1. **Review the detailed report** above.\n2. **Download the PDF** for your records.\n3. **Consult a healthcare provider** if you have any concerns, especially if the status is Caution or Danger.",
+                    answer: "**Recommended Actions:**\\n\\n1. Review detailed report above\\n2. Download PDF for records\\n3. Consult healthcare provider if Caution/Danger status\\n4. Track expenses in Expense Tracker tab",
                     category: "About Your Results"
                 }
             ]
@@ -213,7 +295,6 @@ export function Chatbot({ context }: ChatbotProps) {
     const filteredQuestions = getQuestions()
 
     const handleQuestionClick = (qa: QAItem) => {
-        // Add user question
         const userMsg: Message = {
             id: Date.now().toString(),
             text: qa.question,
@@ -222,10 +303,9 @@ export function Chatbot({ context }: ChatbotProps) {
         }
         setMessages((prev) => [...prev, userMsg])
         setCurrentView("chat")
-        setSearchQuery("") // Clear search
+        setSearchQuery("")
         setIsTyping(true)
 
-        // Simulate thinking and typing
         setTimeout(() => {
             const botMsg: Message = {
                 id: (Date.now() + 1).toString(),
@@ -255,11 +335,10 @@ export function Chatbot({ context }: ChatbotProps) {
     const handleReset = () => {
         setMessages([])
         setCurrentView("categories")
-        // Re-trigger greeting
         setTimeout(() => {
             const greeting: Message = {
                 id: Date.now().toString(),
-                text: "👋 Hi! I'm your **MixSafe AI Assistant**.\n\nI can help you understand drug interactions, explain how to use the app, or answer safety questions. \n\n**How can I help you today?**",
+                text: "👋 **Welcome back to Medaurin!**\\n\\nReady to help with drug interactions, expense tracking, or India govt verification. \\n\\n**How can I assist you?**",
                 sender: "bot",
                 timestamp: new Date(),
             }
@@ -268,19 +347,37 @@ export function Chatbot({ context }: ChatbotProps) {
     }
 
     const renderTextWithMarkdown = (text: string) => {
-        // Simple markdown parser for bold text (**text**)
-        const parts = text.split(/(\*\*.*?\*\*)/g)
-        return parts.map((part, index) => {
-            if (part.startsWith("**") && part.endsWith("**")) {
-                return <strong key={index} className="font-bold text-indigo-600 dark:text-indigo-400">{part.slice(2, -2)}</strong>
+        // First replace literal \n with actual newlines
+        const textWithBreaks = text.replace(/\\n/g, '\n')
+
+        // Split by both markdown and newlines
+        const lines = textWithBreaks.split('\n')
+
+        return lines.map((line, lineIndex) => {
+            const parts = line.split(/(\*\*.*?\*\*)/g)
+            const renderedLine = parts.map((part, partIndex) => {
+                if (part.startsWith("**") && part.endsWith("**")) {
+                    return <strong key={`${lineIndex}-${partIndex}`} className="font-bold text-indigo-600 dark:text-indigo-400">{part.slice(2, -2)}</strong>
+                }
+                return part
+            })
+
+            // Add line break after each line except the last
+            if (lineIndex < lines.length - 1) {
+                return (
+                    <span key={lineIndex}>
+                        {renderedLine}
+                        <br />
+                    </span>
+                )
             }
-            return part
+            return <span key={lineIndex}>{renderedLine}</span>
         })
     }
 
     return (
         <>
-            {/* Toggle Button with Advanced Bubble Effect */}
+            {/* Toggle Button */}
             <button
                 onClick={() => {
                     setIsOpen(!isOpen)
@@ -291,7 +388,6 @@ export function Chatbot({ context }: ChatbotProps) {
                     : "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white"
                     }`}
             >
-                {/* Bubble effect */}
                 {!isOpen && (
                     <>
                         <div className="absolute inset-0 rounded-full bg-indigo-400 animate-ping opacity-75 duration-1000" />
@@ -313,7 +409,6 @@ export function Chatbot({ context }: ChatbotProps) {
             >
                 {/* Header */}
                 <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-4 relative overflow-hidden">
-                    {/* Animated Background Elements */}
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20">
                         <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,transparent_60%)] animate-spin-slow" />
                     </div>
@@ -335,8 +430,8 @@ export function Chatbot({ context }: ChatbotProps) {
                                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-indigo-600 rounded-full animate-pulse" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-white text-lg leading-tight">MixSafe AI</h3>
-                                <p className="text-indigo-100 text-xs flex items-center gap-1 opacity-90">
+                                <h3 className="font-extrabold text-white text-xl leading-tight drop-shadow-lg tracking-wide">Medaurin</h3>
+                                <p className="text-indigo-100 text-xs flex items-center gap-1 opacity-95 font-semibold">
                                     <Sparkles className="w-3 h-3" />
                                     Online & Ready
                                 </p>
@@ -365,7 +460,6 @@ export function Chatbot({ context }: ChatbotProps) {
                     {/* Categories View */}
                     {currentView === "categories" && (
                         <div className="p-4 space-y-4">
-                            {/* Search Bar */}
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition-opacity" />
                                 <div className="relative flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 shadow-sm">
@@ -380,7 +474,6 @@ export function Chatbot({ context }: ChatbotProps) {
                                 </div>
                             </div>
 
-                            {/* Search Results */}
                             {searchQuery ? (
                                 <div className="space-y-2 animate-fade-in">
                                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Search Results</h4>
@@ -483,7 +576,6 @@ export function Chatbot({ context }: ChatbotProps) {
                                     className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} animate-slide-up`}
                                 >
                                     <div className={`flex gap-2 max-w-[85%] ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                                        {/* Avatar */}
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.sender === "user"
                                             ? "bg-indigo-100 dark:bg-indigo-900/50"
                                             : "bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg"
@@ -495,7 +587,6 @@ export function Chatbot({ context }: ChatbotProps) {
                                             )}
                                         </div>
 
-                                        {/* Message Bubble */}
                                         <div
                                             className={`p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === "user"
                                                 ? "bg-indigo-600 text-white rounded-tr-none"
@@ -506,7 +597,6 @@ export function Chatbot({ context }: ChatbotProps) {
                                                 {renderTextWithMarkdown(msg.text)}
                                             </div>
 
-                                            {/* Feedback and TTS for bot messages */}
                                             {msg.sender === "bot" && (
                                                 <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-4">
                                                     <div className="flex items-center gap-4">
@@ -553,7 +643,6 @@ export function Chatbot({ context }: ChatbotProps) {
                                 </div>
                             ))}
 
-                            {/* Typing Indicator */}
                             {isTyping && (
                                 <div className="flex justify-start animate-fade-in">
                                     <div className="flex gap-2 max-w-[85%]">
@@ -573,7 +662,7 @@ export function Chatbot({ context }: ChatbotProps) {
                     )}
                 </div>
 
-                {/* Footer Actions */}
+                {/* Footer */}
                 <div className="p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-700">
                     {currentView === "chat" ? (
                         <div className="flex gap-2">
@@ -595,7 +684,7 @@ export function Chatbot({ context }: ChatbotProps) {
                     ) : (
                         <div className="text-center">
                             <p className="text-[10px] text-slate-400">
-                                AI responses are for informational purposes only.
+                                AI responses are informational only. Consult healthcare providers for medical advice.
                             </p>
                         </div>
                     )}

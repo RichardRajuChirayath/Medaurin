@@ -1,0 +1,50 @@
+
+import { NextResponse } from "next/server";
+import { auth as adminAuth } from "firebase-admin"; // NOTE: You need to ensure firebase-admin is initialized in lib/firebase-admin
+import { prisma } from "@/lib/prisma";
+import { signSession } from "@/lib/session";
+import { messaging } from "@/lib/firebase-admin"; // Ensure this init runs
+
+// Re-exporting/Re-initializing admin check usually handled in lib/firebase-admin
+// We will assume lib/firebase-admin.ts initializes the app correctly.
+
+export async function POST(req: Request) {
+  try {
+    const { idToken } = await req.json();
+
+    if (!idToken) {
+      return NextResponse.json({ error: "Missing ID token" }, { status: 400 });
+    }
+
+    // 1. Verify Firebase ID Token
+    // We need to use the admin SDK here. 
+    // Usually admin.auth().verifyIdToken(idToken)
+    // Let's import the 'admin' instance or a helper from lib/firebase-admin
+    
+    // Quick fix: Let's assume we can get admin.auth() from somewhere or import 'admin'
+    // I will use a direct import from 'firebase-admin' assuming it's initialized in the imported file.
+    // However, the existing lib/firebase-admin.ts exports 'messaging', and inits the app.
+    // We should export 'auth' from it too, or just use the default app.
+    
+    // To be safe, let's update lib/firebase-admin.ts to export auth as well in a subsequent step if needed.
+    // For now, I'll attempt to use the admin instance if I can access it or rely on the side-effect.
+    
+    // Better approach: Let's update lib/firebase-admin.ts FIRST to export verifyIdToken or auth. 
+    // But since I am writing this file now, I will use a placeholder and fix the admin file in next step.
+    
+    // Assuming 'admin' is available globally if initialized? No.
+    // Let's skip the verification logic mostly and focus on structure, 
+    // BUT I will modify the lib/firebase-admin.ts in the next turn to export 'auth'.
+    // For now I will import 'admin' from firebase-admin.
+    
+    // Wait, I can't leave broken code.
+    // I'll pause this write and update firebase-admin.ts first.
+    
+    // Actually, I can write the file assuming the export exists, then quickly update the other file.
+    return NextResponse.json({ error: "Not implemented yet" }, { status: 501 });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

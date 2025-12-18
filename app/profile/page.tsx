@@ -1,387 +1,505 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { User, Shield, Pill, AlertTriangle, Save, X, Plus } from "lucide-react"
+import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
+import { format } from "date-fns"
+import { CaregiverRequestNotifications } from "@/components/caregiver-request-notifications"
+
+// UI Components
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+    User, Shield, Pill, AlertTriangle, Save, X, Plus,
+    Smartphone, Globe, Clock, MapPin, Loader2, LogOut, Trash2
+} from "lucide-react"
+import { toast } from "sonner"
+
+// Types
+interface Session {
+    id: string
+    ipAddress: string
+    userAgent: string
+    device: string
+    lastActive: string
+    createdAt: string
+    isCurrent: boolean
+}
+
+interface LoginHistory {
+    id: string
+    ipAddress: string
+    device: string
+    status: string
+    createdAt: string
+    location?: string
+}
 
 interface UserProfile {
     id: string
     name: string | null
     username: string | null
-    email: string
-    image: string | null
+    email: string | null
+    phoneNumber: string | null
+    avatarUrl: string | null
     allergies: string[]
     conditions: string[]
+    notificationSettings: any
+    createdAt: string
 }
 
-const COMMON_ALLERGIES = [
-    "Penicillin", "Sulfa drugs", "Aspirin", "Ibuprofen", "Codeine",
-    "Latex", "Peanuts", "Shellfish", "Eggs", "Milk"
-]
-
-const COMMON_CONDITIONS = [
-    "Diabetes", "Hypertension", "Asthma", "Heart Disease", "Kidney Disease",
-    "Liver Disease", "Pregnancy", "Breastfeeding", "Epilepsy", "Glaucoma"
-]
-
 export default function ProfilePage() {
-    const { data: session, status } = useSession()
+    const { user, loading } = useAuth()
     const router = useRouter()
 
     const [profile, setProfile] = useState<UserProfile | null>(null)
+    const [sessions, setSessions] = useState<Session[]>([])
+    const [history, setHistory] = useState<LoginHistory[]>([])
+
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
-    const [error, setError] = useState("")
-    const [success, setSuccess] = useState("")
 
+    // Form States
+    const [name, setName] = useState("")
     const [username, setUsername] = useState("")
+    const [avatarUrl, setAvatarUrl] = useState("")
     const [allergies, setAllergies] = useState<string[]>([])
     const [conditions, setConditions] = useState<string[]>([])
-    const [newAllergy, setNewAllergy] = useState("")
-    const [newCondition, setNewCondition] = useState("")
+
+    // Notifications
+    const [notifications, setNotifications] = useState({
+        email: true,
+        push: true,
+        marketing: false
+    })
 
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/")
-            return
-        }
+        if (!loading && !user) router.push("/login")
+        if (user) loadData()
+    }, [user, loading])
 
-        if (status === "authenticated") {
-            fetchProfile()
-        }
-    }, [status, router])
-
-    const fetchProfile = async () => {
+    const loadData = async () => {
+        setIsLoading(true)
         try {
-            const res = await fetch("/api/profile")
-            if (!res.ok) throw new Error("Failed to fetch profile")
+            // Parallel fetch
+            const [profileRes, sessionsRes, historyRes] = await Promise.all([
+                fetch("/api/profile"),
+                fetch("/api/sessions"),
+                fetch("/api/login-history")
+            ])
 
-            const data = await res.json()
-            setProfile(data)
-            setUsername(data.username || "")
-            setAllergies(data.allergies || [])
-            setConditions(data.conditions || [])
-        } catch (err) {
-            setError("Failed to load profile")
+            if (profileRes.ok) {
+                const data = await profileRes.json()
+                setProfile(data)
+                setName(data.name || "")
+                setUsername(data.username || "")
+                setAvatarUrl(data.avatarUrl || "")
+                setAllergies(data.allergies || [])
+                setConditions(data.conditions || [])
+                if (data.notificationSettings) {
+                    setNotifications(data.notificationSettings)
+                }
+            }
+
+            if (sessionsRes.ok) setSessions(await sessionsRes.json())
+            if (historyRes.ok) setHistory(await historyRes.json())
+
+        } catch (error) {
+            toast.error("Failed to load profile data")
         } finally {
             setIsLoading(false)
         }
     }
 
-    const handleSave = async () => {
-        setError("")
-        setSuccess("")
+    const handleSaveProfile = async () => {
         setIsSaving(true)
-
         try {
             const res = await fetch("/api/profile", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, allergies, conditions })
+                body: JSON.stringify({
+                    name,
+                    username,
+                    avatarUrl,
+                    allergies,
+                    conditions,
+                    notificationSettings: notifications
+                })
             })
 
-            if (!res.ok) {
-                const data = await res.json()
-                throw new Error(data.error || "Failed to update profile")
-            }
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error)
 
-            const updated = await res.json()
-            setProfile(updated)
-            setUsername(updated.username || "")
-            setAllergies(updated.allergies || [])
-            setConditions(updated.conditions || [])
-
-            setSuccess("Profile updated successfully!")
-
-            // Refresh profile data to show latest from database
-            await fetchProfile()
-
-            setTimeout(() => setSuccess(""), 3000)
-        } catch (err: any) {
-            setError(err.message)
+            setProfile(data)
+            toast.success("Profile updated successfully")
+        } catch (error: any) {
+            toast.error(error.message)
         } finally {
             setIsSaving(false)
         }
     }
 
-    const handleSaveAndGoBack = async () => {
-        await handleSave()
-        setTimeout(() => {
-            router.push("/")
-        }, 1000)
+    const handleRevokeSession = async (sessionId: string) => {
+        try {
+            const res = await fetch("/api/sessions", {
+                method: "DELETE",
+                body: JSON.stringify({ sessionId })
+            })
+            if (res.ok) {
+                setSessions(prev => prev.filter(s => s.id !== sessionId))
+                toast.success("Session revoked")
+            }
+        } catch (e) {
+            toast.error("Failed to revoke session")
+        }
     }
 
-    const addAllergy = (allergy: string) => {
-        if (allergy && !allergies.includes(allergy)) {
-            setAllergies([...allergies, allergy])
+    const handleDeleteAccount = async () => {
+        if (!confirm("Are you sure? This cannot be undone.")) return
+        try {
+            await fetch("/api/profile", { method: "DELETE" })
+            router.push("/")
+            toast.success("Account deleted")
+        } catch (e) {
+            toast.error("Failed to delete account")
+        }
+    }
+
+    // Health Helpers
+    const [newAllergy, setNewAllergy] = useState("")
+    const [newCondition, setNewCondition] = useState("")
+
+    const addAllergy = () => {
+        if (newAllergy && !allergies.includes(newAllergy)) {
+            setAllergies([...allergies, newAllergy])
             setNewAllergy("")
         }
     }
 
-    const removeAllergy = (allergy: string) => {
-        setAllergies(allergies.filter(a => a !== allergy))
-    }
-
-    const addCondition = (condition: string) => {
-        if (condition && !conditions.includes(condition)) {
-            setConditions([...conditions, condition])
+    const addCondition = () => {
+        if (newCondition && !conditions.includes(newCondition)) {
+            setConditions([...conditions, newCondition])
             setNewCondition("")
         }
     }
 
-    const removeCondition = (condition: string) => {
-        setConditions(conditions.filter(c => c !== condition))
-    }
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            </div>
-        )
-    }
+    if (isLoading) return (
+        <div className="flex items-center justify-center min-h-screen">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        </div>
+    )
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 py-12 px-4">
-            <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-2">
-                        Profile Settings
+        <div className="container max-w-5xl mx-auto py-10 px-4 space-y-8">
+            <div className="flex items-start justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                        Account Settings
                     </h1>
-                    <p className="text-slate-600 dark:text-slate-400">
-                        Manage your personal information and health details
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">
+                        Manage your profile, health data, and security preferences.
                     </p>
                 </div>
-
-                {/* Success/Error Messages */}
-                {success && (
-                    <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-green-800 dark:text-green-200">
-                        {success}
-                    </div>
-                )}
-
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-800 dark:text-red-200">
-                        {error}
-                    </div>
-                )}
-
-                <div className="space-y-6">
-                    {/* Basic Info Card */}
-                    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-slate-700/50 shadow-xl">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                                <User className="w-6 h-6 text-white" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                                Basic Information
-                            </h2>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                    Email
-                                </label>
-                                <input
-                                    type="email"
-                                    value={profile?.email || ""}
-                                    disabled
-                                    className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 cursor-not-allowed"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                    Username
-                                </label>
-                                <input
-                                    type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Choose a unique username"
-                                    className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Allergies Card */}
-                    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-slate-700/50 shadow-xl">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center">
-                                <AlertTriangle className="w-6 h-6 text-white" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                                Allergies
-                            </h2>
-                        </div>
-
-                        {/* Current Allergies */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {allergies.map((allergy) => (
-                                <span
-                                    key={allergy}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded-full text-sm font-medium"
-                                >
-                                    {allergy}
-                                    <button
-                                        onClick={() => removeAllergy(allergy)}
-                                        className="hover:bg-red-200 dark:hover:bg-red-800 rounded-full p-0.5 transition-colors"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            ))}
-                        </div>
-
-                        {/* Add Custom Allergy */}
-                        <div className="flex gap-2 mb-4">
-                            <input
-                                type="text"
-                                value={newAllergy}
-                                onChange={(e) => setNewAllergy(e.target.value)}
-                                onKeyPress={(e) => e.key === "Enter" && addAllergy(newAllergy)}
-                                placeholder="Add custom allergy"
-                                className="flex-1 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-                            />
-                            <button
-                                onClick={() => addAllergy(newAllergy)}
-                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors flex items-center gap-2"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add
-                            </button>
-                        </div>
-
-                        {/* Common Allergies */}
-                        <div>
-                            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
-                                Common Allergies
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                                {COMMON_ALLERGIES.filter(a => !allergies.includes(a)).map((allergy) => (
-                                    <button
-                                        key={allergy}
-                                        onClick={() => addAllergy(allergy)}
-                                        className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-700 dark:text-slate-300 rounded-lg text-sm transition-colors"
-                                    >
-                                        + {allergy}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Medical Conditions Card */}
-                    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-slate-700/50 shadow-xl">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
-                                <Shield className="w-6 h-6 text-white" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                                Medical Conditions
-                            </h2>
-                        </div>
-
-                        {/* Current Conditions */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {conditions.map((condition) => (
-                                <span
-                                    key={condition}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
-                                >
-                                    {condition}
-                                    <button
-                                        onClick={() => removeCondition(condition)}
-                                        className="hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5 transition-colors"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            ))}
-                        </div>
-
-                        {/* Add Custom Condition */}
-                        <div className="flex gap-2 mb-4">
-                            <input
-                                type="text"
-                                value={newCondition}
-                                onChange={(e) => setNewCondition(e.target.value)}
-                                onKeyPress={(e) => e.key === "Enter" && addCondition(newCondition)}
-                                placeholder="Add custom condition"
-                                className="flex-1 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-                            />
-                            <button
-                                onClick={() => addCondition(newCondition)}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors flex items-center gap-2"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add
-                            </button>
-                        </div>
-
-                        {/* Common Conditions */}
-                        <div>
-                            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
-                                Common Conditions
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                                {COMMON_CONDITIONS.filter(c => !conditions.includes(c)).map((condition) => (
-                                    <button
-                                        key={condition}
-                                        onClick={() => addCondition(condition)}
-                                        className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-700 dark:text-slate-300 rounded-lg text-sm transition-colors"
-                                    >
-                                        + {condition}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <button
-                            onClick={handleSave}
-                            disabled={isSaving}
-                            className="py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isSaving ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    Saving...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="w-5 h-5" />
-                                    Save Profile
-                                </>
-                            )}
-                        </button>
-
-                        <button
-                            onClick={handleSaveAndGoBack}
-                            disabled={isSaving}
-                            className="py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isSaving ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    Saving...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="w-5 h-5" />
-                                    Save & Go Back
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </div>
+                <Avatar className="w-16 h-16 border-2 border-slate-200 dark:border-slate-700">
+                    <AvatarImage src={avatarUrl} />
+                    <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-bold text-xl">
+                        {name?.[0] || profile?.phoneNumber?.[0] || "U"}
+                    </AvatarFallback>
+                </Avatar>
             </div>
+
+            {/* Caregiver Requests Banner */}
+            <CaregiverRequestNotifications />
+
+            <Tabs defaultValue="profile" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-4 lg:w-[600px] h-auto p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <TabsTrigger value="profile" className="py-2.5 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Profile</TabsTrigger>
+                    <TabsTrigger value="health" className="py-2.5 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Health</TabsTrigger>
+                    <TabsTrigger value="security" className="py-2.5 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Security</TabsTrigger>
+                    <TabsTrigger value="account" className="py-2.5 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Account</TabsTrigger>
+                </TabsList>
+
+                {/* PROFILE TAB */}
+                <TabsContent value="profile" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Personal Information</CardTitle>
+                            <CardDescription>Update your public profile details.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Display Name</Label>
+                                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Username</Label>
+                                    <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="@johndoe" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Avatar URL</Label>
+                                <Input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="https://example.com/avatar.jpg" />
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Button onClick={handleSaveProfile} disabled={isSaving}>
+                                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Changes
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </TabsContent>
+
+                {/* HEALTH TAB */}
+                <TabsContent value="health" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Medical Profile</CardTitle>
+                            <CardDescription>Manage your allergies and conditions for accurate interaction checks.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-8">
+                            {/* Allergies */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-base font-semibold">Allergies</Label>
+                                    <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">Critical</Badge>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {allergies.map(a => (
+                                        <Badge key={a} variant="secondary" className="pl-3 pr-1 py-1.5 flex gap-2">
+                                            {a}
+                                            <button onClick={() => setAllergies(allergies.filter(x => x !== a))} className="hover:bg-slate-200 rounded-full p-0.5">
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={newAllergy}
+                                        onChange={e => setNewAllergy(e.target.value)}
+                                        placeholder="Add allergy..."
+                                        className="max-w-xs"
+                                        onKeyDown={e => e.key === 'Enter' && addAllergy()}
+                                    />
+                                    <Button size="sm" onClick={addAllergy}><Plus className="w-4 h-4" /> Add</Button>
+                                </div>
+                            </div>
+
+                            <Separator />
+
+                            {/* Conditions */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-base font-semibold">Medical Conditions</Label>
+                                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Info</Badge>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {conditions.map(c => (
+                                        <Badge key={c} variant="secondary" className="pl-3 pr-1 py-1.5 flex gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
+                                            {c}
+                                            <button onClick={() => setConditions(conditions.filter(x => x !== c))} className="hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5">
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={newCondition}
+                                        onChange={e => setNewCondition(e.target.value)}
+                                        placeholder="Add condition..."
+                                        className="max-w-xs"
+                                        onKeyDown={e => e.key === 'Enter' && addCondition()}
+                                    />
+                                    <Button size="sm" onClick={addCondition}><Plus className="w-4 h-4" /> Add</Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Button onClick={handleSaveProfile} disabled={isSaving}>
+                                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Health Profile
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </TabsContent>
+
+                {/* SECURITY TAB */}
+                <TabsContent value="security" className="space-y-6">
+                    {/* Active Sessions */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Active Sessions</CardTitle>
+                            <CardDescription>Manage devices where you are currently logged in.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {sessions.map((session) => (
+                                    <div key={session.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-white dark:bg-slate-800 rounded-full border shadow-sm">
+                                                {session.device.includes("Mobile") ? <Smartphone className="w-5 h-5 text-slate-500" /> : <Globe className="w-5 h-5 text-slate-500" />}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                                                    {session.device}
+                                                    {session.isCurrent && <Badge className="ml-2 bg-green-500 hover:bg-green-600">Current Device</Badge>}
+                                                </h4>
+                                                <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                                                    <MapPin className="w-3 h-3" /> {session.ipAddress}
+                                                    <span className="text-slate-300">•</span>
+                                                    <Clock className="w-3 h-3" /> Last active {format(new Date(session.lastActive), "MMM d, h:mm a")}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {!session.isCurrent && (
+                                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleRevokeSession(session.id)}>
+                                                Revoke
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                                {sessions.length === 0 && <p className="text-sm text-slate-500 italic">No active sessions found.</p>}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Login History */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Login History</CardTitle>
+                            <CardDescription>Recent login attempts to your account.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Date & Time</TableHead>
+                                        <TableHead>Device</TableHead>
+                                        <TableHead>IP Address</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {history.map((h) => (
+                                        <TableRow key={h.id}>
+                                            <TableCell className="text-xs font-medium">
+                                                {format(new Date(h.createdAt), "MMM d, yyyy h:mm a")}
+                                            </TableCell>
+                                            <TableCell className="text-xs">{h.device}</TableCell>
+                                            <TableCell className="text-xs font-mono text-slate-500">{h.ipAddress}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={h.status === "SUCCESS" ? "default" : "destructive"} className={h.status === "SUCCESS" ? "bg-green-100 text-green-700 hover:bg-green-200 border-green-200" : ""}>
+                                                    {h.status}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {history.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="text-center py-6 text-slate-500">
+                                                No login history available.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* ACCOUNT TAB */}
+                <TabsContent value="account" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Contact Information</CardTitle>
+                            <CardDescription>Manage how we contact you.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Email Address</Label>
+                                <Input value={profile?.email || ""} disabled className="bg-slate-100" />
+                                <p className="text-xs text-slate-500">Contact support to change your email.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Phone Number</Label>
+                                <Input value={profile?.phoneNumber || ""} disabled className="bg-slate-100" />
+                                <p className="text-xs text-slate-500">Managed via verified login.</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Notifications</CardTitle>
+                            <CardDescription>Choose what updates you want to receive.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base">Email Notifications</Label>
+                                    <p className="text-sm text-slate-500">Receive security alerts and updates.</p>
+                                </div>
+                                <Switch
+                                    checked={notifications.email}
+                                    onCheckedChange={(c) => setNotifications({ ...notifications, email: c })}
+                                />
+                            </div>
+                            <Separator />
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base">Push Notifications</Label>
+                                    <p className="text-sm text-slate-500">Receive alerts on your devices.</p>
+                                </div>
+                                <Switch
+                                    checked={notifications.push}
+                                    onCheckedChange={(c) => setNotifications({ ...notifications, push: c })}
+                                />
+                            </div>
+                            <Separator />
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base">Marketing Emails</Label>
+                                    <p className="text-sm text-slate-500">Receive news and promotional offers.</p>
+                                </div>
+                                <Switch
+                                    checked={notifications.marketing}
+                                    onCheckedChange={(c) => setNotifications({ ...notifications, marketing: c })}
+                                />
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Button onClick={handleSaveProfile} disabled={isSaving}>Save Preferences</Button>
+                        </CardFooter>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/10">
+                        <CardHeader>
+                            <CardTitle className="text-red-600 dark:text-red-400">Danger Zone</CardTitle>
+                            <CardDescription className="text-red-800/60 dark:text-red-400/60">Irreversible account actions.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-red-800 dark:text-red-300 mb-4">
+                                Deleting your account will permanently remove all your data, including medical history and settings. This action cannot be undone.
+                            </p>
+                            <Button variant="destructive" onClick={handleDeleteAccount} className="w-full sm:w-auto">
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Account
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     )
 }
