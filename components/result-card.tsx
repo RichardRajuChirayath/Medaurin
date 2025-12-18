@@ -224,7 +224,7 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
       )}
 
       {/* Main Status Card */}
-      <div className={`relative overflow-hidden border-2 rounded-3xl p-8 md:p-12 ${config.bgColor} ${config.borderColor} shadow-2xl ${config.glowColor} animate-scale-in`}>
+      <div className={`relative overflow-hidden border-2 rounded-3xl p-5 md:p-12 ${config.bgColor} ${config.borderColor} shadow-2xl ${config.glowColor} animate-scale-in`}>
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{

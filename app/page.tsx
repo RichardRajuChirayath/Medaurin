@@ -329,15 +329,15 @@ export default function Home() {
 
                 {/* Brand Text */}
                 <div className="flex flex-col">
-                  <h1 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-sm">
+                  <h1 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-sm">
                     Medaurin
                   </h1>
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-bold text-slate-600 dark:text-slate-400 tracking-wide">
-                      AI-Powered Medicine Safety
+                    <p className="text-[10px] md:text-xs font-bold text-slate-600 dark:text-slate-400 tracking-wide">
+                      AI Medicine Safety
                     </p>
                     {/* Pro badge */}
-                    <span className="px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black rounded-full shadow-md">
+                    <span className="px-1.5 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] md:text-[10px] font-black rounded-full shadow-md">
                       PRO
                     </span>
                   </div>
@@ -391,7 +391,7 @@ export default function Home() {
                 </div>
 
                 {/* Main Heading */}
-                <h2 className="text-6xl md:text-7xl font-heading font-black text-foreground leading-tight tracking-tight drop-shadow-sm">
+                <h2 className="text-4xl md:text-7xl font-heading font-black text-foreground leading-tight tracking-tight drop-shadow-sm px-2">
                   Check If Your Medicines
                   <br />
                   <span className="text-gradient-primary inline-block filter drop-shadow-sm">
@@ -406,7 +406,7 @@ export default function Home() {
                 </h2>
 
                 {/* Subheading */}
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-medium text-fade-in">
+                <p className="text-lg md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-medium text-fade-in px-4">
                   Upload a photo of your medicines to get instant safety analysis using FDA, RxNorm & NIH databases.
                   Our AI analyzes potential interactions in <span className="font-bold text-primary">seconds</span>.
                 </p>

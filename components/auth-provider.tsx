@@ -1,15 +1,17 @@
-
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { SessionProvider } from "next-auth/react";
 
 // Define user type
 interface User {
     id: string;
+    email: string;
     phoneNumber: string;
     createdAt: string;
-    // Add other fields as needed
+    allergies: string[];
+    conditions: string[];
 }
 
 interface AuthContextType {
@@ -33,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const fetchUser = async () => {
         try {
-            // Wait for a tick to ensure cookies are set if this is called immediately after login
             const res = await fetch("/api/auth/me");
             if (res.ok) {
                 const data = await res.json();
@@ -55,7 +56,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         try {
+            // NextAuth signOut
+            const { signOut } = await import("next-auth/react");
+            await signOut({ redirect: false });
+
+            // Custom API logout
             await fetch("/api/auth/logout", { method: "POST" });
+
             setUser(null);
             router.push("/");
             router.refresh();
@@ -65,9 +72,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, refreshUser: fetchUser, logout }}>
-            {children}
-        </AuthContext.Provider>
+        <SessionProvider>
+            <AuthContext.Provider value={{ user, loading, refreshUser: fetchUser, logout }}>
+                {children}
+            </AuthContext.Provider>
+        </SessionProvider>
     );
 }
 

@@ -261,8 +261,11 @@ export function AuthButton() {
                  shadow-lg hover:shadow-xl flex items-center gap-2"
         >
             <Phone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            <span className="font-bold text-slate-900 dark:text-white">
+            <span className="font-bold text-slate-900 dark:text-white hidden sm:inline">
                 Continue with Phone
+            </span>
+            <span className="font-bold text-slate-900 dark:text-white sm:hidden">
+                Sign In
             </span>
         </Link>
     );

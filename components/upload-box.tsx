@@ -43,7 +43,7 @@ export function UploadBox({ onUpload, disabled }: UploadBoxProps) {
         {/* Animated Glow Background */}
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 rounded-3xl blur-2xl opacity-30 group-hover:opacity-60 transition-all duration-500 animate-pulse-glow" />
 
-        <div className={`relative bg-black/5 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-12 text-center overflow-hidden transition-all duration-500 ${disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-[1.01] hover:border-indigo-500/50"}`}>
+        <div className={`relative bg-black/5 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-6 md:p-12 text-center overflow-hidden transition-all duration-500 ${disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-[1.01] hover:border-indigo-500/50"}`}>
 
           {/* Decorative Grid */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />

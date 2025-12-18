@@ -2,6 +2,8 @@ import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 // Secret key from environment
 const secretKey = process.env.SESSION_SECRET;
@@ -13,7 +15,7 @@ const key = new TextEncoder().encode(secretKey);
 // Session payload supports ALL auth methods
 export interface SessionPayload extends JWTPayload {
     userId: string;       // always required
-    sessionId: string;    // Database Session ID
+    sessionId?: string;    // Database Session ID (optional for NextAuth)
     email?: string;       // for magic link
     firebaseUid?: string; // for Firebase login
     phoneNumber?: string; // optional for phone-based login
@@ -132,6 +134,20 @@ export async function updateSession(
  * Checks against Database to ensure session is active.
  */
 export async function getSession() {
+    // 1. Try NextAuth session first (New Standard)
+    try {
+        const nextAuthSession = await getServerSession(authOptions);
+        if (nextAuthSession?.user?.id) {
+            return {
+                userId: nextAuthSession.user.id,
+                email: nextAuthSession.user.email || undefined,
+            } as SessionPayload;
+        }
+    } catch (e) {
+        console.error("NextAuth session check error:", e);
+    }
+
+    // 2. Fallback to custom session_token (Legacy/Transition)
     const token = (await cookies()).get("session_token")?.value;
     if (!token) return null;
 
@@ -142,25 +158,20 @@ export async function getSession() {
 
         const sessionPayload = payload as SessionPayload;
 
-        // 1. Check if session ID exists in DB
+        // Check if session ID exists in DB
         if (sessionPayload.sessionId) {
             const dbSession = await prisma.session.findUnique({
                 where: { id: sessionPayload.sessionId }
             });
 
-            if (!dbSession) {
-                // Session revoked or not found
-                return null;
-            }
+            if (!dbSession) return null;
 
-            // 2. Optional: Check expiration if DB has stricter rules
             if (dbSession.expires < new Date()) {
-                // clean up
                 await prisma.session.delete({ where: { id: dbSession.id } }).catch(() => { });
                 return null;
             }
 
-            // 3. Update lastActive (async, don't await/block)
+            // Update lastActive (async)
             prisma.session.update({
                 where: { id: dbSession.id },
                 data: { lastActive: new Date() }

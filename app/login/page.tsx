@@ -5,6 +5,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "fi
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { Loader2, Phone, CheckCircle, AlertCircle, Mail, ArrowRight } from "lucide-react";
+import { signIn } from "next-auth/react";
 import { useAuth } from "@/components/auth-provider";
 
 export default function LoginPage() {
@@ -93,21 +94,20 @@ export default function LoginPage() {
         setError("");
 
         try {
-            const res = await fetch("/api/auth/send-magic-link", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
+            const result = await signIn("email", {
+                email,
+                callbackUrl: "/",
+                redirect: false,
             });
 
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || "Failed to send magic link");
+            if (result?.error) {
+                throw new Error(result.error);
             }
 
             setMagicLinkSent(true);
         } catch (err: any) {
             console.error(err);
-            setError(err.message);
+            setError(err.message || "Failed to send magic link");
         } finally {
             setLoading(false);
         }
@@ -131,8 +131,8 @@ export default function LoginPage() {
                         <button
                             onClick={() => { setLoginMethod("PHONE"); setError(""); }}
                             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${loginMethod === "PHONE"
-                                    ? "bg-white dark:bg-slate-600 text-indigo-600 dark:text-white shadow-sm"
-                                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                                ? "bg-white dark:bg-slate-600 text-indigo-600 dark:text-white shadow-sm"
+                                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
                                 }`}
                         >
                             Phone
@@ -140,8 +140,8 @@ export default function LoginPage() {
                         <button
                             onClick={() => { setLoginMethod("EMAIL"); setError(""); }}
                             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${loginMethod === "EMAIL"
-                                    ? "bg-white dark:bg-slate-600 text-indigo-600 dark:text-white shadow-sm"
-                                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                                ? "bg-white dark:bg-slate-600 text-indigo-600 dark:text-white shadow-sm"
+                                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
                                 }`}
                         >
                             Email
