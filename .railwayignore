@@ -1,0 +1,6 @@
+# Railway-specific gitignore additions
+# Exclude all .env files from Railway deployments
+.env
+.env.local
+.env.production
+.env.example
