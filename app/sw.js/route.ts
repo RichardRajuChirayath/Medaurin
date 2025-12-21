@@ -1,3 +1,7 @@
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+    const config = `
 // Service Worker for MixSafe
 // Handles: Push notifications, offline caching, background sync
 
@@ -5,13 +9,13 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDFfdpSAJwmp7_FNKGhnHGucKQHkiyiBVk",
-    authDomain: "expensetracker-dc734.firebaseapp.com",
-    projectId: "expensetracker-dc734",
-    storageBucket: "expensetracker-dc734.firebasestorage.app",
-    messagingSenderId: "633688564128",
-    appId: "1:633688564128:web:d97c9cfe2ad4c62aae44c5",
-    measurementId: "G-4BCR6G3B9C"
+    apiKey: "${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}",
+    authDomain: "${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}",
+    projectId: "${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}",
+    storageBucket: "${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}",
+    messagingSenderId: "${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}",
+    appId: "${process.env.NEXT_PUBLIC_FIREBASE_APP_ID}",
+    measurementId: "${process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}"
 };
 
 try {
@@ -76,7 +80,6 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-    // Skip cross-origin requests
     if (!event.request.url.startsWith(self.location.origin)) return;
 
     event.respondWith(
@@ -97,7 +100,6 @@ self.addEventListener('fetch', (event) => {
                 });
             })
             .catch(() => {
-                // Fallback to offline page if available (ignoring for now to prevent 404 loops in dev)
                 return null;
             })
     );
@@ -125,3 +127,14 @@ self.addEventListener('notificationclick', (event) => {
             })
     )
 })
+`;
+
+    return new NextResponse(config, {
+        headers: {
+            'Content-Type': 'application/javascript',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+        },
+    });
+}
