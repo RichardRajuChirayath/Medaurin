@@ -8,7 +8,7 @@ import { Chatbot } from "@/components/chatbot"
 import { SymptomChecker } from "@/components/symptom-checker"
 import { BotProtection } from "@/components/bot-protection"
 import { AuthButton } from "@/components/auth-button"
-import { VoiceInput } from "@/components/voice-input"
+
 import { WelcomeModal } from "@/components/welcome-modal"
 import { TypingAnimation } from "@/components/typing-animation"
 import { Sparkles, Shield, Zap, Moon, Sun, Activity, Brain, Database } from "lucide-react"
@@ -38,7 +38,7 @@ export default function Home() {
   const [manualMedicines, setManualMedicines] = useState("")
   const [analysisType, setAnalysisType] = useState<"photo" | "manual">("photo")
   const [isVerified, setIsVerified] = useState(false)
-  const [isVoiceInteraction, setIsVoiceInteraction] = useState(false)
+
 
   useEffect(() => {
     setMounted(true)
@@ -391,7 +391,7 @@ export default function Home() {
                 </div>
 
                 {/* Main Heading */}
-                <h2 className="text-4xl md:text-7xl font-heading font-black text-foreground leading-tight tracking-tight drop-shadow-sm px-2">
+                <h2 className="text-3xl sm:text-4xl md:text-7xl font-heading font-black text-foreground leading-tight tracking-tight drop-shadow-sm px-2">
                   Check If Your Medicines
                   <br />
                   <span className="text-gradient-primary inline-block filter drop-shadow-sm">
@@ -465,49 +465,22 @@ export default function Home() {
                 <p className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">
                   Or, enter medicine names manually
                 </p>
-                <form onSubmit={handleManualSubmit} className="max-w-xl mx-auto">
-                  <div className="flex gap-3 items-center">
+                <form onSubmit={handleManualSubmit} className="max-w-xl mx-auto px-2">
+                  <div className="flex flex-col sm:flex-row gap-3 items-stretch">
                     <input
                       type="text"
                       value={manualMedicines}
-                      onChange={(e) => {
-                        setManualMedicines(e.target.value)
-                        setIsVoiceInteraction(false)
-                      }}
+                      onChange={(e) => setManualMedicines(e.target.value)}
                       placeholder="e.g., Aspirin, Metformin, Lipitor"
                       className="w-full px-6 py-4 text-lg text-slate-900 dark:text-white bg-white/80 dark:bg-slate-800/80 border-2 border-slate-300 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-300 shadow-sm placeholder:text-slate-400"
                       disabled={loading}
                     />
-                    <VoiceInput
-                      onTranscript={(text) => {
-                        // Append new text to existing text, handling commas
-                        setManualMedicines(prev => {
-                          const trimmed = prev.trim()
-                          if (!trimmed) return text
-                          // If it doesn't end with a comma, add one
-                          return trimmed.endsWith(',') ? `${trimmed} ${text}` : `${trimmed}, ${text}`
-                        })
-                        setIsVoiceInteraction(true)
-                      }}
-                      onCommand={(command) => {
-                        if (command === 'clear') {
-                          setManualMedicines('')
-                        } else if (command === 'analyze') {
-                          // Trigger submission if we have medicines and are verified
-                          if (manualMedicines.trim() && isVerified) {
-                            setIsVoiceInteraction(true)
-                            const fakeEvent = { preventDefault: () => { } } as React.FormEvent
-                            handleManualSubmit(fakeEvent)
-                          }
-                        }
-                      }}
-                      isProcessing={loading}
-                    />
+
                   </div>
                   <button
                     type="submit"
                     disabled={loading || !isVerified}
-                    className="mt-6 group relative inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-black rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="mt-4 sm:mt-6 w-full sm:w-auto group relative inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-black rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-30 transition-opacity blur-xl" />
                     <span className="relative z-10 text-lg">Analyze Medicines</span>
@@ -526,7 +499,6 @@ export default function Home() {
               <ResultCard
                 result={result}
                 analysisType={analysisType}
-                autoSpeak={isVoiceInteraction}
               />
 
               <SymptomChecker result={result} />
@@ -534,7 +506,7 @@ export default function Home() {
               <div className="text-center mt-12">
                 <button
                   onClick={handleReset}
-                  className="group relative inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-black rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl overflow-hidden"
+                  className="group w-full sm:w-auto relative inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-black rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-30 transition-opacity blur-xl" />
                   <Activity className="w-5 h-5 mr-2 relative z-10" />

@@ -11,15 +11,11 @@ Most safety checkers are either **too generic** (US-only data) or **too local** 
 
 ---
 
-## 🔐 Secure Dual-Login System
-Designed for flexibility across user demographics:
-1.  **Phone Authentication (Mobile First):**
-    *   Powered by **Firebase Auth**, optimized for the Indian market where phone numbers are the primary identity.
-    *   Instant OTP verification for rapid access on the go.
-2.  **Magic Link (Privacy First):**
-    *   **Passwordless Email Login:** Users receive a secure, one-time click link.
-    *   Eliminates password reuse risks and fishing attacks.
-    *   Ideal for desktop users managing heavy expense exports.
+## 🔐 Secure Magic Link Login
+Designed for privacy and security:
+*   **Passwordless Email Login:** Users receive a secure, one-time click link.
+*   **Eliminates Password Risks:** Protects against password reuse and phishing.
+*   **Ideal for Desktop:** Seamlessly manage heavy expense exports.
 
 ## 🛡️ Enterprise-Grade Security
 *   **AES-256 Encryption:** All sensitive internal data (like IMAP credentials for expense tracking) is encrypted at rest using bank-grade AES-256-CBC.
@@ -27,7 +23,7 @@ Designed for flexibility across user demographics:
     *   **Revocable Sessions:** Database-backed sessions allow users to remotely log out suspicious devices.
     *   **Device Fingerprinting:** Tracks IP, User-Agent, and Device Type for every login to detect anomalies.
 *   **Privacy by Design:**
-    *   **Client-Side AI:** OCR and Voice Recognition happen in the browser or via transient streams. No personal audio/image data is permanently stored for training.
+    *   **Client-Side AI:** OCR recognition happens in the browser or via transient streams. No personal image data is permanently stored for training.
 
 ---
 
@@ -36,7 +32,6 @@ Designed for flexibility across user demographics:
 
 ### Step 1: Omni-Channel Input
 *   **Visual:** Camera scan or Image Upload (Prescriptions/Bills).
-*   **Audio:** Voice command via **Whisper AI** (e.g., "Check interactions for Metformin and Aspirin").
 *   **Manual:** Text search with auto-complete.
 
 ### Step 2: Intelligent Extraction & Normalization
@@ -56,7 +51,6 @@ Designed for flexibility across user demographics:
 
 ### Step 5: Actionable Intelligence Output
 *   **Visual Cards:** "Safe", "Monitor", or "Danger" status with color-coded alerts.
-*   **Audio Readout:** TTS engine explains results for accessibility.
 *   **Contextual Chatbot:** AI assistant ready to explain *why* a combination is dangerous.
 
 ---

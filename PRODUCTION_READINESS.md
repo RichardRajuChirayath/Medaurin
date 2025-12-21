@@ -70,7 +70,6 @@ npx prisma generate
 
 ### ✅ Service Worker
 - OCR works offline (Tesseract.js)
-- Voice recognition offline (Whisper AI)
 - Caching strategy defined
 
 ### 📝 To Add
@@ -80,7 +79,7 @@ npx prisma generate
 
 ## 🔔 Push Notifications
 
-### OTP Billing Activation
+### Firebase Activation
 **YES, you can enable this AFTER production!**
 
 1. Create a Firebase project: https://console.firebase.google.com
@@ -187,6 +186,6 @@ Before going live:
 
 The app is ready for deployment. You can:
 1. Deploy NOW with core features
-2. Enable OTP billing (FCM) later
+2. Enable Push (FCM) later
 3. Add Weather Shield later
 4. All features are modular and can be activated on-demand

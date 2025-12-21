@@ -4,7 +4,7 @@ import { useState } from "react"
 import { AlertCircle, CheckCircle2, AlertTriangle, Pill, ArrowRight, TrendingUp, Shield, Info, Download } from "lucide-react"
 import { InteractionList } from "./interaction-list"
 import { FDAInfoSection } from "./fda-info-section"
-import { SpeakButton } from "./speak-button"
+
 
 interface ResultProps {
   status: "safe" | "caution" | "danger" | "unknown" | "insufficient"
@@ -41,9 +41,9 @@ interface ResultProps {
   sameDrugDetected?: boolean
 }
 
-export function ResultCard(props: { result: ResultProps; analysisType: "photo" | "manual"; autoSpeak?: boolean }) {
+export function ResultCard(props: { result: ResultProps; analysisType: "photo" | "manual" }) {
   const { status, score, medicines, interactions, recommendations, medicineDetails, unknownMedicines = [], doubleDosingWarnings = [], healthWarnings = [] } = props.result
-  const { analysisType, autoSpeak } = props
+  const { analysisType } = props
   const [isDownloading, setIsDownloading] = useState(false)
 
   // Frontend Filter: Ensure we NEVER display unknown medicines in the main list
@@ -260,14 +260,9 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
               </p>
             </div>
 
-            {/* Download and Speak Buttons */}
-            <div className="mt-6 md:mt-0 flex flex-col sm:flex-row gap-3">
-              <SpeakButton
-                text={`Analysis complete. Status: ${config.label}. ${config.description}. Risk score: ${score} out of 100. ${displayMedicines.length} medicines analyzed: ${displayMedicines.join(', ')}. ${interactions.length > 0 ? `${interactions.length} interactions found.` : 'No significant interactions detected.'} ${recommendations.length > 0 ? `Recommendations: ${recommendations.join('. ')}` : ''}`}
-                label="Listen"
-                className="px-4 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-slate-800 dark:text-white"
-                autoSpeak={autoSpeak}
-              />
+            {/* Download Button */}
+            <div className="mt-6 md:mt-0">
+
               <button
                 onClick={handleDownload}
                 disabled={isDownloading}

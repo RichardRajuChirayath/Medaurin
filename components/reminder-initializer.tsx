@@ -135,67 +135,6 @@ export function ReminderInitializer() {
         }
     }, [notificationMode])
 
-    return (
-        <div className="fixed bottom-4 right-4 z-50">
-            <div className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-4 backdrop-blur-xl">
-                <div className="flex items-center gap-3 mb-3">
-                    <Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                        Reminders
-                    </h4>
-                </div>
-
-                <div className="space-y-3">
-                    {/* Mode Toggle */}
-                    <button
-                        onClick={toggleNotificationMode}
-                        className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${notificationMode === "alarm"
-                            ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
-                            : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
-                            }`}
-                    >
-                        <div className="flex items-center gap-2">
-                            {notificationMode === "alarm" ? (
-                                <Volume2 className="w-5 h-5" />
-                            ) : (
-                                <Bell className="w-5 h-5" />
-                            )}
-                            <span className="text-sm font-bold">
-                                {notificationMode === "alarm" ? "Alarm Mode" : "Standard"}
-                            </span>
-                        </div>
-                        {isPlaying && (
-                            <span className="animate-pulse">🔊</span>
-                        )}
-                    </button>
-
-                    {/* Test Alarm Button (only in alarm mode) */}
-                    {notificationMode === "alarm" && (
-                        <button
-                            onClick={testAlarm}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-all text-sm font-medium"
-                        >
-                            {isPlaying ? (
-                                <>
-                                    <VolumeX className="w-4 h-4" />
-                                    Stop Test
-                                </>
-                            ) : (
-                                <>
-                                    <Volume2 className="w-4 h-4" />
-                                    Test Alarm
-                                </>
-                            )}
-                        </button>
-                    )}
-
-                    <p className="text-xs text-slate-600 dark:text-slate-400 text-center">
-                        {notificationMode === "alarm"
-                            ? "Alarms will play a sound when reminders fire"
-                            : "Standard browser notifications"}
-                    </p>
-                </div>
-            </div>
-        </div>
-    )
+    // Return null to hide UI while keeping background logic active
+    return null
 }

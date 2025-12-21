@@ -3,9 +3,8 @@
 import { useState, useEffect, useRef } from "react"
 import {
     MessageCircle, X, Bot, Sparkles, HelpCircle, ArrowLeft,
-    Search, ThumbsUp, ThumbsDown, Minus, RefreshCw, Volume2, VolumeX
+    Search, ThumbsUp, ThumbsDown, Minus, RefreshCw
 } from "lucide-react"
-import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 
 interface Message {
     id: string
@@ -40,7 +39,7 @@ const QA_DATABASE: QAItem[] = [
     // Drug Interaction Checker
     {
         question: "How does drug interaction checking work?",
-        answer: "Our **AI-powered system** analyzes your medicines using:\\n\\n• **3 Medical Databases** - FDA, NIH, RxNorm\\n• **Advanced OCR** - Read medicine names from photos\\n• **Voice Input** - Whisper AI for speech recognition\\n• **6-Factor Risk Scoring** - Comprehensive safety assessment\\n\\nGet results in seconds with detailed PDF reports!",
+        answer: "Our **AI-powered system** analyzes your medicines using:\\n\\n• **3 Medical Databases** - FDA, NIH, RxNorm\\n• **Advanced OCR** - Read medicine names from photos\\n• **6-Factor Risk Scoring** - Comprehensive safety assessment\\n\\nGet results in seconds with detailed PDF reports!",
         category: "Drug Interaction",
         keywords: ["work", "interaction", "check", "safety"]
     },
@@ -56,12 +55,7 @@ const QA_DATABASE: QAItem[] = [
         category: "Drug Interaction",
         keywords: ["photo", "ocr", "image", "scan", "upload"]
     },
-    {
-        question: "Does voice input work offline?",
-        answer: "**YES!** We use **Whisper AI** which works **completely offline** for speech-to-text. Just speak your medicine names clearly and we'll recognize them - no internet needed for voice recognition!",
-        category: "Drug Interaction",
-        keywords: ["voice", "offline", "speak", "whisper", "microphone"]
-    },
+
 
     // Medicine Expense Tracker
     {
@@ -140,7 +134,7 @@ const QA_DATABASE: QAItem[] = [
     },
     {
         question: "Does Medaurin work offline?",
-        answer: "**Partially!** \\n\\n✅ **Offline**:\\n- Voice input (Whisper AI)\\n- India govt verification (local datasets)\\n- Expense tracker (local storage)\\n\\n❌ **Needs Internet**:\\n- Drug interaction API (FDA/NIH)\\n- Email import (IMAP)\\n- FCM notifications\\n\\nCore features work **without constant internet**!",
+        answer: "**Partially!** \\n\\n✅ **Offline**:\\n- India govt verification (local datasets)\\n- Expense tracker (local storage)\\n\\n❌ **Needs Internet**:\\n- Drug interaction API (FDA/NIH)\\n- Email import (IMAP)\\n- FCM notifications\\n\\nCore features work **without constant internet**!",
         category: "Technical",
         keywords: ["offline", "internet", "connection", "network"]
     },
@@ -214,8 +208,6 @@ export function Chatbot({ context }: ChatbotProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [searchResults, setSearchResults] = useState<QAItem[]>([])
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    const { speak, cancel, isSpeaking } = useTextToSpeech({ rate: 1.1, pitch: 1.0 })
-    const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null)
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -614,28 +606,7 @@ export function Chatbot({ context }: ChatbotProps) {
                                                             </>
                                                         )}
                                                     </div>
-                                                    <button
-                                                        onClick={() => {
-                                                            if (speakingMessageId === msg.id) {
-                                                                cancel()
-                                                                setSpeakingMessageId(null)
-                                                            } else {
-                                                                cancel()
-                                                                const cleanText = msg.text.replace(/\*\*/g, '').replace(/\n/g, '. ')
-                                                                speak(cleanText)
-                                                                setSpeakingMessageId(msg.id)
-                                                                setTimeout(() => setSpeakingMessageId(null), cleanText.length * 50)
-                                                            }
-                                                        }}
-                                                        className="p-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-                                                        title={speakingMessageId === msg.id ? "Stop speaking" : "Read aloud"}
-                                                    >
-                                                        {speakingMessageId === msg.id ? (
-                                                            <VolumeX className="w-4 h-4 animate-pulse" />
-                                                        ) : (
-                                                            <Volume2 className="w-4 h-4" />
-                                                        )}
-                                                    </button>
+
                                                 </div>
                                             )}
                                         </div>

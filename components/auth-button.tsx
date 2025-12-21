@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth-provider";
-import { User, LogOut, History, Loader2, Phone, Receipt, Shield } from "lucide-react";
+import { User, LogOut, History, Loader2, Mail, Receipt, Shield } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
@@ -260,12 +260,9 @@ export function AuthButton() {
                  border border-slate-200/50 dark:border-slate-700/50 transition-all
                  shadow-lg hover:shadow-xl flex items-center gap-2"
         >
-            <Phone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            <span className="font-bold text-slate-900 dark:text-white hidden sm:inline">
-                Continue with Phone
-            </span>
-            <span className="font-bold text-slate-900 dark:text-white sm:hidden">
-                Sign In
+            <Mail className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <span className="font-bold text-slate-900 dark:text-white">
+                Login
             </span>
         </Link>
     );
