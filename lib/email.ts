@@ -59,66 +59,52 @@ export async function sendCaregiverInvitationEmail(
     const subject = `${caregiverName} wants to be your caregiver on Medaurin`;
 
     const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-                .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-                .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
-                .icon { font-size: 48px; margin-bottom: 10px; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <div class="icon">🏥</div>
-                    <h1 style="margin: 0;">Caregiver Request</h1>
+        <div style="font-family: 'Outfit', 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #f8fafc; color: #0f172a;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 32px; font-weight: 900; color: #7c3aed; letter-spacing: -1px; margin-bottom: 8px;">
+                    🛡️ Medaurin
                 </div>
-                <div class="content">
-                    <p>Hello,</p>
-                    
-                    <p><strong>${caregiverName}</strong> has sent you a caregiver request on <strong>Medaurin</strong>.</p>
-                    
-                    <p>By accepting this request, <strong>${caregiverName}</strong> will be able to:</p>
-                    <ul>
-                        <li>📊 View your medication schedule</li>
-                        <li>🔔 Receive alerts about missed doses</li>
-                        <li>💊 Monitor your medication adherence</li>
-                        <li>🛡️ Help ensure your medication safety</li>
-                    </ul>
-                    
-                    <p><strong>To accept or reject this request:</strong></p>
-                    <ol>
-                        <li>Log in to your Medaurin account</li>
-                        <li>Go to your Profile or Dashboard</li>
-                        <li>Review the pending caregiver request</li>
-                        <li>Accept or reject the request</li>
-                    </ol>
-                    
-                    <div style="text-align: center;">
-                        <a href="${appUrl}/login" class="button">Log In to Medaurin</a>
-                    </div>
-                    
-                    <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 14px;">
-                        <strong>Don't have an account?</strong><br>
-                        You can create one using this email address to view and respond to the request.
-                    </p>
-                    
-                    <p style="color: #666; font-size: 14px;">
-                        If you did not expect this request, you can safely ignore this email.
-                    </p>
-                </div>
-                <div class="footer">
-                    <p>© ${new Date().getFullYear()} Medaurin - Medicine Safety & Expense Tracker</p>
-                    <p>This is an automated message, please do not reply.</p>
+                <div style="font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; tracking: 2px;">
+                    Guardian Support System
                 </div>
             </div>
-        </body>
-        </html>
+            
+            <div style="background-color: #ffffff; padding: 40px; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
+                <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-top: 0; margin-bottom: 24px; text-align: center;">
+                    Caregiver Request
+                </h1>
+                
+                <p style="font-size: 16px; line-height: 24px; color: #475569; margin-bottom: 24px;">
+                    Hello, <br /><br />
+                    <strong>${caregiverName}</strong> has sent you a secure caregiver request on <strong>Medaurin</strong>.
+                </p>
+
+                <div style="background-color: #f1f5f9; padding: 24px; border-radius: 16px; margin-bottom: 32px;">
+                    <p style="font-size: 14px; font-weight: 800; color: #475569; text-transform: uppercase; margin-top: 0; margin-bottom: 12px;">Permissions Included:</p>
+                    <ul style="margin: 0; padding-left: 20px; color: #475569; font-size: 15px; line-height: 22px;">
+                        <li>View your medication schedule</li>
+                        <li>Receive alerts for missed doses</li>
+                        <li>Monitor health safety profiles</li>
+                    </ul>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <a href="${appUrl}/login" style="display: inline-block; background-color: #7c3aed; color: #ffffff; padding: 18px 48px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 18px; box-shadow: 0 4px 14px 0 rgba(124, 58, 237, 0.39);">
+                        Review Request
+                    </a>
+                </div>
+
+                <p style="font-size: 14px; color: #94a3b8; font-weight: 500; text-align: center; margin-bottom: 0;">
+                    Don't have an account? You can create one during login using this email.
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #94a3b8; font-weight: 500;">
+                &copy; ${new Date().getFullYear()} Medaurin. Protecting lives with intelligence.
+                <br />
+                If you did not expect this request, you can safely ignore this email.
+            </div>
+        </div>
     `;
 
     return sendEmail({
