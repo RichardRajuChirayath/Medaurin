@@ -194,8 +194,8 @@ export function AuthButton() {
                                 href="/caregiver"
                                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
                             >
-                                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
-                                    <Shield className="w-4 h-4" />
+                                <div className="p-1 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
+                                    <img src="/logo.png" className="w-6 h-6 object-contain" alt="Logo" />
                                 </div>
                                 <div className="text-left">
                                     <p className="font-bold text-slate-900 dark:text-white text-sm">Caregiver Portal</p>

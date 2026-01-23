@@ -93,9 +93,9 @@ export function CaregiverDashboard() {
             {/* --- Premium Header --- */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 p-2">
                 <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest">
-                        <Shield className="w-3 h-3" />
-                        Guardian System Active
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-sm transition-all group-hover:border-primary/50">
+                        <img src="/logo.png" className="w-4 h-4 object-contain" alt="Logo" />
+                        <span className="text-primary text-[10px] font-black uppercase tracking-widest">Guardian Shield Active</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
                         Family <span className="text-gradient-primary">Guardian</span>
@@ -268,10 +268,10 @@ function PatientCard({ patient, onRefresh }: { patient: Patient, onRefresh: () =
 
     return (
         <div className={`group relative overflow-hidden rounded-[32px] border-2 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 ${isCritical
-                ? "bg-red-50/50 dark:bg-red-950/20 border-red-500 shadow-xl shadow-red-500/10"
-                : isWarning
-                    ? "bg-amber-50/50 dark:bg-amber-950/20 border-amber-500 shadow-xl shadow-amber-500/10"
-                    : "glass-card border-slate-200 dark:border-white/10 hover:border-primary/50"
+            ? "bg-red-50/50 dark:bg-red-950/20 border-red-500 shadow-xl shadow-red-500/10"
+            : isWarning
+                ? "bg-amber-50/50 dark:bg-amber-950/20 border-amber-500 shadow-xl shadow-amber-500/10"
+                : "glass-card border-slate-200 dark:border-white/10 hover:border-primary/50"
             }`}>
             {/* --- Status Glow Effect --- */}
             {isCritical && (
@@ -365,8 +365,8 @@ function PatientCard({ patient, onRefresh }: { patient: Patient, onRefresh: () =
                     <div className="space-y-1">
                         <div className="text-xs font-black text-red-600 uppercase tracking-widest pl-1">Missed</div>
                         <div className={`p-4 rounded-2xl border text-4xl font-black ${patient.stats.missed > 0
-                                ? "bg-red-100 dark:bg-red-900/40 border-red-500 text-red-600 shadow-lg shadow-red-500/10"
-                                : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-300 dark:text-slate-700"
+                            ? "bg-red-100 dark:bg-red-900/40 border-red-500 text-red-600 shadow-lg shadow-red-500/10"
+                            : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-300 dark:text-slate-700"
                             }`}>
                             {patient.stats.missed}
                         </div>

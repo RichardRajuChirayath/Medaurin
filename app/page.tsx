@@ -316,8 +316,12 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition-all duration-500" />
 
                   {/* Logo container */}
-                  <div className="relative bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 p-3.5 rounded-2xl shadow-2xl transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-500">
-                    <Shield className="w-8 h-8 text-white drop-shadow-lg" />
+                  <div className="relative bg-white dark:bg-slate-900 p-1.5 rounded-2xl shadow-2xl transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-500 flex items-center justify-center overflow-hidden">
+                    <img
+                      src="/logo.png"
+                      alt="Medaurin Logo"
+                      className="w-12 h-12 object-contain group-hover:animate-pulse"
+                    />
 
                     {/* Shine effect */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 group-hover:animate-shine" />
@@ -333,7 +337,7 @@ export default function Home() {
                     Medaurin
                   </h1>
                   <div className="flex items-center gap-2">
-                    <p className="text-[10px] md:text-xs font-bold text-slate-600 dark:text-slate-400 tracking-wide">
+                    <p className="text-[10px] md:text-xs font-bold text-slate-600 dark:text-slate-400 tracking-wide uppercase">
                       AI Medicine Safety
                     </p>
                     {/* Pro badge */}

@@ -47,8 +47,9 @@ export const authOptions: NextAuthOptions = {
                             htmlContent: `
                                 <div style="font-family: 'Outfit', 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #f8fafc; color: #0f172a;">
                                     <div style="text-align: center; margin-bottom: 30px;">
+                                        <img src="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/logo.png" alt="Medaurin Logo" style="width: 80px; height: 80px; margin-bottom: 12px;" />
                                         <div style="font-size: 32px; font-weight: 900; color: #7c3aed; letter-spacing: -1px; margin-bottom: 8px;">
-                                            🛡️ Medaurin
+                                            Medaurin
                                         </div>
                                         <div style="font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; tracking: 2px;">
                                             Medicine Safety Portal
