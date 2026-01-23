@@ -149,3 +149,31 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
+
+// PATCH: Update relationship (e.g., change nickname)
+export async function PATCH(request: Request) {
+    try {
+        const session = await getSession()
+        if (!session?.userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+        const { relationshipId, nickname } = await request.json()
+
+        const relation = await prisma.careRelationship.findUnique({
+            where: { id: relationshipId }
+        })
+
+        if (!relation || relation.caregiverId !== session.userId) {
+            return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 })
+        }
+
+        const updated = await prisma.careRelationship.update({
+            where: { id: relationshipId },
+            data: { nickname }
+        })
+
+        return NextResponse.json(updated)
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+}
+
