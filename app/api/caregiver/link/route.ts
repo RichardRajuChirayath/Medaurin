@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/session"
 import { prisma } from "@/lib/prisma"
+import { sendCaregiverInvitationEmail } from "@/lib/email"
 
 // POST: Send a Caregiver Request (Caregiver -> Patient)
 export async function POST(request: Request) {
@@ -11,6 +12,16 @@ export async function POST(request: Request) {
         const { patientEmail, nickname } = await request.json()
         const normalizedEmail = patientEmail.trim()
         console.log(`[Caregiver Link] Searching for: ${normalizedEmail}`)
+
+        // Get caregiver info for email
+        const caregiver = await prisma.user.findUnique({
+            where: { id: session.userId },
+            select: { name: true, email: true }
+        })
+
+        if (!caregiver) {
+            return NextResponse.json({ error: "Caregiver not found" }, { status: 404 })
+        }
 
         // Use findFirst for case-insensitive search if supported by DB config, 
         // or just rely on findFirst which is more flexible than findUnique here
@@ -59,6 +70,22 @@ export async function POST(request: Request) {
                 status: "PENDING"
             }
         })
+
+        // 📧 Send email notification to patient
+        const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+        const caregiverName = caregiver.name || caregiver.email || "Someone"
+
+        const emailSent = await sendCaregiverInvitationEmail(
+            normalizedEmail,
+            caregiverName,
+            appUrl
+        )
+
+        if (emailSent) {
+            console.log(`[Caregiver Link] Email sent to ${normalizedEmail}`)
+        } else {
+            console.warn(`[Caregiver Link] Email failed to send to ${normalizedEmail}`)
+        }
 
         return NextResponse.json(relation)
     } catch (error: any) {
