@@ -307,28 +307,25 @@ export default function Home() {
             <div className="flex items-center justify-between">
               {/* Logo & Brand Section */}
               <div className="flex items-center gap-4">
-                {/* Animated Logo with Premium Glow */}
-                <div className="relative group cursor-pointer">
-                  {/* Outer glow ring */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-2xl blur-2xl opacity-40 group-hover:opacity-60 transition-all duration-500 animate-pulse-glow scale-110" />
+                {/* Animated Logo with Premium Glow - LEGENDARY SIZE */}
+                <div className="relative group cursor-pointer -ml-2">
+                  {/* Extreme outer glow */}
+                  <div className="absolute inset-x-0 -inset-y-4 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-full blur-[40px] opacity-0 group-hover:opacity-40 transition-all duration-700 animate-pulse-glow" />
 
-                  {/* Middle glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition-all duration-500" />
-
-                  {/* Logo container */}
-                  <div className="relative bg-white dark:bg-slate-900 p-1.5 rounded-2xl shadow-2xl transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-500 flex items-center justify-center overflow-hidden">
+                  {/* Logo container - Clean & Floating */}
+                  <div className="relative transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-700 flex items-center justify-center">
                     <img
                       src="/logo.png"
                       alt="Medaurin Logo"
-                      className="w-12 h-12 object-contain group-hover:animate-pulse"
+                      className="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-[0_0_15px_rgba(124,58,237,0.5)] animate-float"
                     />
 
-                    {/* Shine effect */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 group-hover:animate-shine" />
+                    {/* Shine effect overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
                   </div>
 
-                  {/* Status indicator */}
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-white dark:border-slate-900 rounded-full shadow-lg animate-pulse" />
+                  {/* Active Pulse indicator */}
+                  <div className="absolute bottom-4 right-4 w-5 h-5 bg-gradient-to-br from-emerald-400 to-green-600 border-4 border-white dark:border-slate-950 rounded-full shadow-[0_0_15px_rgba(52,211,153,0.5)] animate-pulse" />
                 </div>
 
                 {/* Brand Text */}
