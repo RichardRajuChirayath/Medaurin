@@ -388,19 +388,19 @@ export default function Home() {
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
                 </div>
 
-                {/* Main Heading */}
-                <h2 className="text-3xl sm:text-4xl md:text-7xl font-heading font-black text-foreground leading-tight tracking-tight drop-shadow-sm px-2">
-                  Check If Your Medicines
-                  <br />
-                  <span className="text-gradient-primary inline-block filter drop-shadow-sm">
-                    <TypingAnimation
-                      words={["Aspirin", "Metformin", "Ibuprofen", "Dolo", "Crocin", "Paracetamol"]}
-                    />
-                  </span>
-                  <br />
-                  <span className="text-gradient-primary inline-block filter drop-shadow-sm">
-                    Are Safe Together
-                  </span>
+                {/* Main Heading - REFINED FOR BREATHABILITY */}
+                <h2 className="text-4xl sm:text-5xl md:text-7xl font-heading font-black text-slate-900 dark:text-white leading-[1.15] tracking-tight text-balance px-4">
+                  Check if your medicines{" "}
+                  <span className="relative inline-block px-3 py-1 group mx-1">
+                    {/* Visual Anchor for attention */}
+                    <span className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/10 -rotate-2 rounded-2xl group-hover:rotate-0 transition-transform duration-500 shadow-sm" />
+                    <span className="text-gradient-primary relative z-10 drop-shadow-sm">
+                      <TypingAnimation
+                        words={["Aspirin", "Metformin", "Ibuprofen", "Dolo", "Crocin", "Paracetamol"]}
+                      />
+                    </span>
+                  </span>{" "}
+                  are safe together
                 </h2>
 
                 {/* Subheading */}
