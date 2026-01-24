@@ -34,6 +34,16 @@ export function MobileNav() {
             href: "/",
         },
         {
+            label: "Meds",
+            icon: Pill,
+            href: "/medications",
+        },
+        {
+            label: "Expenses",
+            icon: Receipt,
+            href: "/expenses",
+        },
+        {
             label: "Guardian",
             icon: Shield,
             href: "/caregiver",
@@ -46,16 +56,6 @@ export function MobileNav() {
                 e.preventDefault()
                 window.dispatchEvent(new CustomEvent('open-medaurin-chat'))
             }
-        },
-        {
-            label: "Expenses",
-            icon: Receipt,
-            href: "/expenses",
-        },
-        {
-            label: "Profile",
-            icon: User,
-            href: "/profile",
         },
     ]
 
