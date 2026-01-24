@@ -1,21 +1,21 @@
 {
-    "name": "MixSafe - Medicine Safety Checker",
-    "short_name": "MixSafe",
-    "description": "Check medicine interactions and manage your medications safely",
+    "name": "Medaurin - AI Medicine Safety",
+    "short_name": "Medaurin",
+    "description": "AI-powered safety analysis for your medications.",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#0f172a",
-    "theme_color": "#6366f1",
+    "theme_color": "#4f46e5",
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "/icon-192.png",
+            "src": "/logo.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-512.png",
+            "src": "/logo.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
