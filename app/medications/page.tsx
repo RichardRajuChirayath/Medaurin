@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation"
 import { Pill, Plus, Clock, Calendar, CheckCircle2, AlertCircle, TrendingUp, Bell, ChevronLeft, BellOff } from "lucide-react"
 import { useNotifications } from "@/hooks/use-notifications"
 import { WeatherHealthShield } from "@/components/weather-health-shield"
+import { toast } from "sonner"
+
 
 interface Medication {
     id: string
@@ -415,8 +417,10 @@ export default function MedicationsPage() {
 function AddMedicationModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
     const [medicineName, setMedicineName] = useState("")
     const [dosage, setDosage] = useState("")
-    const [frequency, setFrequency] = useState("")
-    const [reminderTimesString, setReminderTimesString] = useState("")
+    const [frequency, setFrequency] = useState("Once daily")
+    const [reminderHour, setReminderHour] = useState("09")
+    const [reminderMinute, setReminderMinute] = useState("00")
+    const [reminderPeriod, setReminderPeriod] = useState<"AM" | "PM">("AM")
     const [notes, setNotes] = useState("")
     const [isSaving, setIsSaving] = useState(false)
 
@@ -424,11 +428,13 @@ function AddMedicationModal({ onClose, onSuccess }: { onClose: () => void; onSuc
         e.preventDefault()
         setIsSaving(true)
 
-        // Parse reminder times
-        const reminderTimes = reminderTimesString
-            .split(",")
-            .map(t => t.trim())
-            .filter(t => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(t)); // Basic HH:MM validation
+        // Convert AM/PM to 24h format for storage
+        let hours = parseInt(reminderHour)
+        if (reminderPeriod === "PM" && hours < 12) hours += 12
+        if (reminderPeriod === "AM" && hours === 12) hours = 0
+
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${reminderMinute}`
+        const reminderTimes = [formattedTime]
 
         try {
             const res = await fetch("/api/medications", {
@@ -445,113 +451,151 @@ function AddMedicationModal({ onClose, onSuccess }: { onClose: () => void; onSuc
             })
 
             if (res.ok) {
+                toast.success("Medication added with background reminders!")
                 onSuccess()
             } else {
                 const data = await res.json()
+                toast.error("Failed to save medication")
                 console.error("Failed to add:", data)
-                // Optionally show toast error here
             }
         } catch (error) {
             console.error("Error adding medication:", error)
+            toast.error("An error occurred. Please try again.")
         } finally {
             setIsSaving(false)
         }
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Add Medication</h2>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20 dark:border-white/10 animate-scale-in">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white">New Medication</h2>
+                    <div className="bg-indigo-100 dark:bg-indigo-900/30 px-3 py-1 rounded-full flex items-center gap-2">
+                        <Bell className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                        <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Reminders On</span>
+                    </div>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Medicine Name *
+                        <label className="block text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                            Medicine Name
                         </label>
                         <input
                             type="text"
                             value={medicineName}
                             onChange={(e) => setMedicineName(e.target.value)}
                             required
-                            className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-                            placeholder="e.g., Aspirin"
+                            className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white focus:border-indigo-500 transition-all font-medium"
+                            placeholder="e.g., Paracetamol"
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Dosage *
-                        </label>
-                        <input
-                            type="text"
-                            value={dosage}
-                            onChange={(e) => setDosage(e.target.value)}
-                            required
-                            className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-                            placeholder="e.g., 500mg or 2 tablets"
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                                Dosage
+                            </label>
+                            <input
+                                type="text"
+                                value={dosage}
+                                onChange={(e) => setDosage(e.target.value)}
+                                required
+                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white focus:border-indigo-500 transition-all font-medium"
+                                placeholder="e.g., 500mg"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                                Frequency
+                            </label>
+                            <select
+                                value={frequency}
+                                onChange={(e) => setFrequency(e.target.value)}
+                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white focus:border-indigo-500 transition-all font-bold"
+                            >
+                                <option>Once daily</option>
+                                <option>Twice daily</option>
+                                <option>Thrice daily</option>
+                                <option>Every 4 hours</option>
+                                <option>As needed</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Frequency *
+                        <label className="block text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                            Reminder Time
                         </label>
-                        <select
-                            value={frequency}
-                            onChange={(e) => setFrequency(e.target.value)}
-                            required
-                            className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-                        >
-                            <option value="">Select frequency</option>
-                            <option value="Once daily">Once daily</option>
-                            <option value="Twice daily">Twice daily</option>
-                            <option value="Three times daily">Three times daily</option>
-                            <option value="Every 4 hours">Every 4 hours</option>
-                            <option value="Every 6 hours">Every 6 hours</option>
-                            <option value="Every 8 hours">Every 8 hours</option>
-                            <option value="As needed">As needed</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                            <select
+                                value={reminderHour}
+                                onChange={(e) => setReminderHour(e.target.value)}
+                                className="flex-1 px-3 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-center font-bold"
+                            >
+                                {Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(h => (
+                                    <option key={h} value={h}>{h}</option>
+                                ))}
+                            </select>
+                            <span className="font-bold">:</span>
+                            <select
+                                value={reminderMinute}
+                                onChange={(e) => setReminderMinute(e.target.value)}
+                                className="flex-1 px-3 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-center font-bold"
+                            >
+                                {["00", "15", "30", "45"].map(m => (
+                                    <option key={m} value={m}>{m}</option>
+                                ))}
+                            </select>
+                            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border-2 border-slate-200 dark:border-slate-700 ml-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setReminderPeriod("AM")}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${reminderPeriod === "AM" ? "bg-white dark:bg-indigo-600 shadow-sm text-indigo-600 dark:text-white" : "text-slate-400"}`}
+                                >
+                                    AM
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setReminderPeriod("PM")}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${reminderPeriod === "PM" ? "bg-white dark:bg-indigo-600 shadow-sm text-indigo-600 dark:text-white" : "text-slate-400"}`}
+                                >
+                                    PM
+                                </button>
+                            </div>
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            Notifications will fire even when Medaurin is closed.
+                        </p>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Reminder Times (24h format HH:MM, comma separated)
-                        </label>
-                        <input
-                            type="text"
-                            value={reminderTimesString}
-                            onChange={(e) => setReminderTimesString(e.target.value)}
-                            className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-                            placeholder="e.g., 09:00, 21:00"
-                        />
-                        <p className="text-xs text-slate-500 mt-1">Example: 08:30, 20:30</p>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Notes
+                        <label className="block text-sm font-black text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                            Notes (Optional)
                         </label>
                         <textarea
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
-                            className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-                            rows={3}
-                            placeholder="Any special instructions..."
+                            className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white focus:border-indigo-500 transition-all font-medium resize-none"
+                            rows={2}
+                            placeholder="e.g., Take after food"
                         />
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 pt-2">
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all disabled:opacity-50"
+                            className="flex-1 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-black rounded-2xl shadow-lg hover:shadow-indigo-500/25 transition-all active:scale-95 disabled:opacity-50"
                         >
-                            {isSaving ? "Adding..." : "Add Medication"}
+                            {isSaving ? "Saving..." : "Set Reminder"}
                         </button>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all"
+                            className="px-6 py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl transition-all"
                         >
                             Cancel
                         </button>
