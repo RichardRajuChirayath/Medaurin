@@ -8,6 +8,7 @@ import { ReminderInitializer } from "@/components/reminder-initializer";
 import { Chatbot } from "@/components/chatbot";
 import { Analytics } from "@vercel/analytics/react";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
+import { MobileNav } from "@/components/mobile-nav";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -55,7 +56,10 @@ export default function RootLayout({
           <ServiceWorkerRegistration />
           <AuthProvider>
             <ReminderInitializer />
-            {children}
+            <div className="pb-24 md:pb-0">
+              {children}
+            </div>
+            <MobileNav />
             <Toaster position="top-center" richColors />
             <Chatbot />
           </AuthProvider>
