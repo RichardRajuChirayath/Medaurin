@@ -38,6 +38,7 @@ export default function Home() {
   const [manualMedicines, setManualMedicines] = useState("")
   const [analysisType, setAnalysisType] = useState<"photo" | "manual">("photo")
   const [isVerified, setIsVerified] = useState(false)
+  const [shouldShake, setShouldShake] = useState(false)
 
 
   useEffect(() => {
@@ -56,7 +57,12 @@ export default function Home() {
 
   const handleUpload = async (file: File) => {
     if (!isVerified) {
-      setError("Please verify you're not a robot before uploading.")
+      setShouldShake(true)
+      setTimeout(() => setShouldShake(false), 800)
+      toast.error("Verification Required", {
+        description: "Please click 'I'm not a robot' before scanning.",
+        style: { background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca' }
+      })
       return
     }
 
@@ -156,7 +162,12 @@ export default function Home() {
     e.preventDefault()
 
     if (!isVerified) {
-      setError("Please verify you're not a robot before submitting.")
+      setShouldShake(true)
+      setTimeout(() => setShouldShake(false), 800)
+      toast.error("Verification Required", {
+        description: "Please click 'I'm not a robot' before submitting.",
+        style: { background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca' }
+      })
       return
     }
 
@@ -458,13 +469,12 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Bot Protection */}
               <div className="mb-8 max-w-xl mx-auto">
-                <BotProtection onVerified={setIsVerified} isVerified={isVerified} />
+                <BotProtection onVerified={setIsVerified} isVerified={isVerified} shouldShake={shouldShake} />
               </div>
 
               {/* Upload Box */}
-              <UploadBox onUpload={handleUpload} disabled={loading || !isVerified} />
+              <UploadBox onUpload={handleUpload} disabled={loading} />
 
               {/* Manual Input Section */}
               <div className="mt-12 text-center">
@@ -485,7 +495,7 @@ export default function Home() {
                   </div>
                   <button
                     type="submit"
-                    disabled={loading || !isVerified}
+                    disabled={loading}
                     className="mt-4 sm:mt-6 w-full sm:w-auto group relative inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-black rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-30 transition-opacity blur-xl" />

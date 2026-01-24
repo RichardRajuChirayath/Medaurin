@@ -6,9 +6,10 @@ import { Shield, CheckCircle, AlertCircle } from "lucide-react"
 interface BotProtectionProps {
     onVerified: (verified: boolean) => void
     isVerified: boolean
+    shouldShake?: boolean
 }
 
-export function BotProtection({ onVerified, isVerified }: BotProtectionProps) {
+export function BotProtection({ onVerified, isVerified, shouldShake }: BotProtectionProps) {
     const [isChecking, setIsChecking] = useState(false)
     const [showSuccess, setShowSuccess] = useState(false)
 
@@ -46,6 +47,7 @@ export function BotProtection({ onVerified, isVerified }: BotProtectionProps) {
                         : 'bg-white/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500'
                     }
           ${isChecking ? 'opacity-75 cursor-wait' : 'cursor-pointer hover:shadow-lg'}
+          ${shouldShake && !isVerified ? 'animate-shake border-red-500' : ''}
           disabled:cursor-not-allowed
         `}
             >
