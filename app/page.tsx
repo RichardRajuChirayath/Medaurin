@@ -308,13 +308,12 @@ export default function Home() {
                   {/* Logo container - Neural Sphere Backdrop for visibility */}
                   <div className="relative transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-700 flex items-center justify-center">
                     {/* The "Safe Light" Sphere - Ensures logo visibility in light mode */}
-                    <div className="absolute inset-2 bg-slate-900/90 dark:bg-slate-800/40 rounded-full blur-md" />
-                    <div className="absolute inset-0 bg-slate-900/80 dark:bg-transparent rounded-2xl backdrop-blur-sm border border-white/10 shadow-inner md:hidden" />
+                    <div className="absolute inset-1.5 md:inset-2 bg-slate-900 dark:bg-slate-800/50 rounded-full blur-md md:blur-lg" />
 
                     <img
                       src="/logo.png"
                       alt="Medaurin Logo"
-                      className="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-[0_0_20px_rgba(124,58,237,0.6)] animate-float relative z-10"
+                      className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_20px_rgba(124,58,237,0.6)] animate-float relative z-10"
                       style={{ mixBlendMode: 'screen' }}
                     />
 
@@ -456,7 +455,18 @@ export default function Home() {
               </div>
 
               {/* Upload Box */}
-              <UploadBox onUpload={handleUpload} disabled={loading} />
+              <UploadBox
+                onUpload={handleUpload}
+                disabled={loading}
+                onBlockedClick={!isVerified ? () => {
+                  setShouldShake(true)
+                  setTimeout(() => setShouldShake(false), 800)
+                  toast.error("Verification Required", {
+                    description: "Please click 'I'm not a robot' before scanning.",
+                    style: { background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca' }
+                  })
+                } : undefined}
+              />
 
               {/* Manual Input Section */}
               <div className="mt-12 text-center">

@@ -7,11 +7,20 @@ import { SmartCamera } from "@/components/smart-camera"
 interface UploadBoxProps {
   onUpload: (file: File) => void
   disabled?: boolean
+  onBlockedClick?: () => void
 }
 
-export function UploadBox({ onUpload, disabled }: UploadBoxProps) {
+export function UploadBox({ onUpload, disabled, onBlockedClick }: UploadBoxProps) {
   const [isCameraOpen, setIsCameraOpen] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
+
+  const handleCameraClick = () => {
+    if (onBlockedClick) {
+      onBlockedClick()
+      return
+    }
+    setIsCameraOpen(true)
+  }
 
   const handleFile = (file: File) => {
     if (file.type.startsWith("image/")) {
@@ -64,7 +73,7 @@ export function UploadBox({ onUpload, disabled }: UploadBoxProps) {
               <>
                 {/* Big Smart Scan Button */}
                 <button
-                  onClick={() => setIsCameraOpen(true)}
+                  onClick={handleCameraClick}
                   disabled={disabled}
                   className="group/btn relative w-full max-w-md mx-auto aspect-video flex flex-col items-center justify-center bg-zinc-900 hover:bg-zinc-800 border-2 border-zinc-700 hover:border-yellow-400/50 rounded-3xl transition-all duration-500 shadow-2xl hover:shadow-[0_0_50px_rgba(234,179,8,0.2)] overflow-hidden"
                 >
