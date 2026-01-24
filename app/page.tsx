@@ -312,16 +312,17 @@ export default function Home() {
                   {/* Extreme outer glow */}
                   <div className="absolute inset-x-0 -inset-y-4 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-full blur-[40px] opacity-0 group-hover:opacity-40 transition-all duration-700 animate-pulse-glow" />
 
-                  {/* Logo container - Clean & Floating */}
+                  {/* Logo container - Clean & Floating with Blend Mode */}
                   <div className="relative transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-700 flex items-center justify-center">
                     <img
                       src="/logo.png"
                       alt="Medaurin Logo"
                       className="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-[0_0_15px_rgba(124,58,237,0.5)] animate-float"
+                      style={{ mixBlendMode: 'screen' }}
                     />
 
                     {/* Shine effect overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
                   </div>
 
                   {/* Active Pulse indicator */}
