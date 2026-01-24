@@ -312,17 +312,21 @@ export default function Home() {
                   {/* Extreme outer glow */}
                   <div className="absolute inset-x-0 -inset-y-4 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-full blur-[40px] opacity-0 group-hover:opacity-40 transition-all duration-700 animate-pulse-glow" />
 
-                  {/* Logo container - Clean & Floating with Blend Mode */}
+                  {/* Logo container - Neural Sphere Backdrop for visibility */}
                   <div className="relative transform group-hover:scale-110 group-hover:-rotate-3 transition-all duration-700 flex items-center justify-center">
+                    {/* The "Safe Light" Sphere - Ensures logo visibility in light mode */}
+                    <div className="absolute inset-2 bg-slate-900/90 dark:bg-slate-800/40 rounded-full blur-md" />
+                    <div className="absolute inset-0 bg-slate-900/80 dark:bg-transparent rounded-2xl backdrop-blur-sm border border-white/10 shadow-inner md:hidden" />
+
                     <img
                       src="/logo.png"
                       alt="Medaurin Logo"
-                      className="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-[0_0_15px_rgba(124,58,237,0.5)] animate-float"
+                      className="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-[0_0_20px_rgba(124,58,237,0.6)] animate-float relative z-10"
                       style={{ mixBlendMode: 'screen' }}
                     />
 
                     {/* Shine effect overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none z-20" />
                   </div>
 
                   {/* Active Pulse indicator */}

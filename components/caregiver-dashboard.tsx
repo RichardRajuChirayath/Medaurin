@@ -94,7 +94,9 @@ export function CaregiverDashboard() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 p-2">
                 <div className="space-y-2">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-sm transition-all group-hover:border-primary/50">
-                        <img src="/logo.png" className="w-4 h-4 object-contain" alt="Logo" />
+                        <div className="bg-slate-900 rounded p-0.5 flex items-center justify-center">
+                            <img src="/logo.png" className="w-3.5 h-3.5 object-contain" alt="Logo" style={{ mixBlendMode: 'screen' }} />
+                        </div>
                         <span className="text-primary text-[10px] font-black uppercase tracking-widest">Guardian Shield Active</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">

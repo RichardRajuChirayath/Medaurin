@@ -194,8 +194,8 @@ export function AuthButton() {
                                 href="/caregiver"
                                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
                             >
-                                <div className="p-1 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
-                                    <img src="/logo.png" className="w-6 h-6 object-contain" alt="Logo" />
+                                <div className="p-1 bg-slate-900 rounded-lg shadow-sm flex items-center justify-center">
+                                    <img src="/logo.png" className="w-6 h-6 object-contain" alt="Logo" style={{ mixBlendMode: 'screen' }} />
                                 </div>
                                 <div className="text-left">
                                     <p className="font-bold text-slate-900 dark:text-white text-sm">Caregiver Portal</p>
