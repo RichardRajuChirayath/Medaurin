@@ -1,5 +1,6 @@
 "use client"
 
+import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Home, Pill, Receipt, Shield, User, History, Bot } from "lucide-react"
@@ -9,8 +10,22 @@ import { cn } from "@/lib/utils"
 export function MobileNav() {
     const pathname = usePathname()
     const { user } = useAuth()
+    const [isVisible, setIsVisible] = useState(true)
 
-    if (!user) return null
+    useEffect(() => {
+        const handleOpen = () => setIsVisible(false)
+        const handleClose = () => setIsVisible(true)
+
+        window.addEventListener('medaurin-camera-open', handleOpen)
+        window.addEventListener('medaurin-camera-close', handleClose)
+
+        return () => {
+            window.removeEventListener('medaurin-camera-open', handleOpen)
+            window.removeEventListener('medaurin-camera-close', handleClose)
+        }
+    }, [])
+
+    if (!user || !isVisible) return null
 
     const navItems = [
         {

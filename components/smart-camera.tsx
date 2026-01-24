@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
-import { Camera, RefreshCw, Check, X, Zap, ScanLine, Maximize, Smartphone, Sparkles } from "lucide-react"
+import { Camera, RefreshCw, Check, X, Zap, ScanLine, Maximize, Smartphone, Sparkles, ArrowLeft } from "lucide-react"
 import Webcam from "react-webcam"
 import { toast } from "sonner"
 
@@ -25,10 +25,12 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
     const [cvLoaded, setCvLoaded] = useState(false)
     const [facingMode, setFacingMode] = useState<"user" | "environment">("environment")
     const [viewMode, setViewMode] = useState<"original" | "processed">("processed")
-
     const [cameraError, setCameraError] = useState<string | null>(null)
 
     useEffect(() => {
+        // Signal background UI to hide
+        window.dispatchEvent(new CustomEvent('medaurin-camera-open'))
+
         // Check if OpenCV is loaded
         const checkCv = setInterval(() => {
             if (window.cv && window.cv.Mat) {
@@ -43,6 +45,8 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
         return () => {
             clearInterval(checkCv)
             clearTimeout(timeout)
+            // Signal background UI to show
+            window.dispatchEvent(new CustomEvent('medaurin-camera-close'))
         }
     }, [])
 
@@ -70,51 +74,34 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
                 try {
                     const cv = window.cv
                     setProcessingStage("Reading Image Data...")
-
-                    // Create Mat from image
                     const src = cv.imread(img)
                     const dst = new cv.Mat()
 
                     setProcessingStage("Converting to Grayscale...")
-                    // Convert to grayscale
                     cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0)
 
                     setProcessingStage("Removing Noise...")
-                    // Apply Gaussian Blur to reduce noise
                     const ksize = new cv.Size(5, 5)
                     cv.GaussianBlur(src, src, ksize, 0, 0, cv.BORDER_DEFAULT)
 
                     setProcessingStage("Enhancing Contrast (Adaptive Threshold)...")
-                    // Apply Adaptive Thresholding
-                    // This is the magic step that makes text pop out from shadows
                     cv.adaptiveThreshold(src, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)
 
-                    // Optional: Morphological operations to clean up small noise
-                    // const M = cv.Mat.ones(3, 3, cv.CV_8U);
-                    // cv.erode(dst, dst, M);
-                    // cv.dilate(dst, dst, M);
-
                     setProcessingStage("Finalizing...")
-                    // Show processed image
                     cv.imshow('processed-canvas', dst)
 
-                    // Get Data URL from canvas
                     const canvas = document.getElementById('processed-canvas') as HTMLCanvasElement
                     if (canvas) {
                         setProcessedImg(canvas.toDataURL('image/png'))
                     }
 
-                    // Cleanup
                     src.delete()
                     dst.delete()
-                    // M.delete()
-
                     setIsProcessing(false)
                 } catch (err) {
                     console.error("OpenCV Error:", err)
                     toast.error("Failed to process image with OpenCV")
                     setIsProcessing(false)
-                    // Fallback to original
                     setProcessedImg(imageSrc)
                 }
             }
@@ -132,7 +119,6 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
     const handleConfirm = () => {
         const finalImage = viewMode === "processed" && processedImg ? processedImg : imgSrc
         if (finalImage) {
-            // Convert DataURL to File
             fetch(finalImage)
                 .then(res => res.blob())
                 .then(blob => {
@@ -149,9 +135,8 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
             if (error.name === 'NotAllowedError') msg = "Camera access denied. Please allow permissions."
             if (error.name === 'NotFoundError') msg = "No camera device found."
             if (error.name === 'NotReadableError') msg = "Camera is currently in use by another app."
-            // Chrome blocks HTTP camera access on non-localhost
-            if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-                msg = "Camera requires HTTPS or localhost. If testing on network, use a secure connection."
+            if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
+                msg = "Camera requires HTTPS or localhost."
             }
         }
         setCameraError(msg)
@@ -159,11 +144,12 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
     }, [])
 
     return (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col">
+        <div className="fixed inset-0 z-[100] bg-black flex flex-col">
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
-                <button onClick={onClose} className="p-2 rounded-full bg-black/40 text-white backdrop-blur-md">
-                    <X className="w-6 h-6" />
+                <button onClick={onClose} className="p-2 rounded-full bg-black/40 text-white backdrop-blur-md flex items-center gap-2 hover:bg-black/60 transition-all active:scale-90">
+                    <ArrowLeft className="w-6 h-6" />
+                    <span className="text-sm font-bold md:hidden">Back</span>
                 </button>
                 <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600/80 backdrop-blur-md">
                     <Zap className="w-4 h-4 text-yellow-300 fill-yellow-300" />
@@ -171,7 +157,7 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
                 </div>
                 <button
                     onClick={() => setFacingMode(prev => prev === "user" ? "environment" : "user")}
-                    className="p-2 rounded-full bg-black/40 text-white backdrop-blur-md"
+                    className="p-2 rounded-full bg-black/40 text-white backdrop-blur-md transition-all active:rotate-180"
                 >
                     <RefreshCw className="w-6 h-6" />
                 </button>
@@ -203,27 +189,22 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
                             onUserMediaError={handleCameraError}
                         />
 
-                        {/* Camera Overlay Elements */}
                         <div className="absolute inset-0 pointer-events-none">
-                            {/* Subtle vignette instead of thick border */}
                             <div className="absolute inset-0 bg-radial-gradient-vignette opacity-20" />
-
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[75%] border-2 border-white/50 rounded-lg">
                                 <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-indigo-500 -mt-1 -ml-1" />
                                 <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-indigo-500 -mt-1 -mr-1" />
                                 <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-indigo-500 -mb-1 -ml-1" />
                                 <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-indigo-500 -mb-1 -mr-1" />
                             </div>
-
                             {!cvLoaded && (
                                 <div className="absolute top-8 left-0 right-0 flex justify-center">
                                     <div className="bg-yellow-500/90 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 backdrop-blur-md">
                                         <Zap className="w-3 h-3" />
-                                        <span>AI Engine Loading... (Basic Scan Active)</span>
+                                        <span>AI Engine Loading...</span>
                                     </div>
                                 </div>
                             )}
-
                             <p className="absolute bottom-32 left-0 right-0 text-center text-white/80 font-medium text-sm">
                                 Align medicines within frame
                             </p>
@@ -240,11 +221,8 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
                     </>
                 ) : (
                     <div className="relative w-full h-full bg-black flex flex-col">
-                        {/* Image Preview Area */}
                         <div className="flex-1 relative overflow-hidden flex items-center justify-center">
-                            {/* Hidden Canvas for Processing */}
                             <canvas id="processed-canvas" className="hidden" />
-
                             {isProcessing ? (
                                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
                                     <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -258,21 +236,17 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
                                     style={{ filter: viewMode === "processed" ? 'contrast(1.2) brightness(1.1)' : 'none' }}
                                 />
                             )}
-
-                            {/* View Toggle - Only show if not processing */}
                             {!isProcessing && processedImg && (
                                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex bg-black/60 backdrop-blur-md rounded-full p-1 border border-white/20">
                                     <button
                                         onClick={() => setViewMode("original")}
-                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === "original" ? "bg-white text-black" : "text-white hover:text-white/80"
-                                            }`}
+                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === "original" ? "bg-white text-black" : "text-white hover:text-white/80"}`}
                                     >
                                         Original
                                     </button>
                                     <button
                                         onClick={() => setViewMode("processed")}
-                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${viewMode === "processed" ? "bg-indigo-600 text-white" : "text-white hover:text-white/80"
-                                            }`}
+                                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 ${viewMode === "processed" ? "bg-indigo-600 text-white" : "text-white hover:text-white/80"}`}
                                     >
                                         <Sparkles className="w-3 h-3" />
                                         Enhanced
@@ -280,8 +254,6 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
                                 </div>
                             )}
                         </div>
-
-                        {/* Action Bar */}
                         <div className="h-24 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between px-8">
                             <button
                                 onClick={handleRetake}
@@ -291,7 +263,6 @@ export function SmartCamera({ onCapture, onClose }: SmartCameraProps) {
                                 <RefreshCw className="w-6 h-6" />
                                 <span className="text-xs">Retake</span>
                             </button>
-
                             <button
                                 onClick={handleConfirm}
                                 disabled={isProcessing}
