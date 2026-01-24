@@ -252,6 +252,16 @@ export function Chatbot({ context }: ChatbotProps) {
         }
     }, [searchQuery])
 
+    // External Trigger Logic
+    useEffect(() => {
+        const handleOpenChat = () => {
+            setIsOpen(true)
+            setIsMinimized(false)
+        }
+        window.addEventListener('open-medaurin-chat', handleOpenChat)
+        return () => window.removeEventListener('open-medaurin-chat', handleOpenChat)
+    }, [])
+
     const currentCategories = context
         ? ["About Your Results", ...CATEGORIES]
         : CATEGORIES
@@ -369,13 +379,13 @@ export function Chatbot({ context }: ChatbotProps) {
 
     return (
         <>
-            {/* Toggle Button */}
+            {/* Toggle Button - Hidden on mobile, handled by MobileNav */}
             <button
                 onClick={() => {
                     setIsOpen(!isOpen)
                     setIsMinimized(false)
                 }}
-                className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-all duration-500 hover:scale-110 group ${isOpen && !isMinimized
+                className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-all duration-500 hover:scale-110 group hidden md:flex ${isOpen && !isMinimized
                     ? "bg-slate-800 text-white rotate-90 scale-90"
                     : "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white"
                     }`}

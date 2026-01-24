@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Pill, Receipt, Shield, User, History } from "lucide-react"
+import { Home, Pill, Receipt, Shield, User, History, Bot } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { cn } from "@/lib/utils"
 
@@ -19,19 +19,23 @@ export function MobileNav() {
             href: "/",
         },
         {
-            label: "Meds",
-            icon: Pill,
-            href: "/medications",
+            label: "Guardian",
+            icon: Shield,
+            href: "/caregiver",
+        },
+        {
+            label: "Assistant",
+            icon: Bot,
+            href: "#chat",
+            onClick: (e: React.MouseEvent) => {
+                e.preventDefault()
+                window.dispatchEvent(new CustomEvent('open-medaurin-chat'))
+            }
         },
         {
             label: "Expenses",
             icon: Receipt,
             href: "/expenses",
-        },
-        {
-            label: "Guardian",
-            icon: Shield,
-            href: "/caregiver",
         },
         {
             label: "Profile",
@@ -54,6 +58,7 @@ export function MobileNav() {
                         <Link
                             key={item.href}
                             href={item.href}
+                            onClick={item.onClick}
                             className={cn(
                                 "flex flex-col items-center gap-1 transition-all duration-300 relative group",
                                 isActive ? "scale-110" : "opacity-60 grayscale-[0.5]"

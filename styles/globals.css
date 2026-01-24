@@ -166,21 +166,41 @@
   }
 }
 
-/* Animations */
+/* Animations - Hardware Accelerated */
 @keyframes float {
 
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-10px) translateZ(0);
   }
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1) translateZ(0);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05) translateZ(0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+  will-change: opacity, transform;
 }
 
 @keyframes gradient {

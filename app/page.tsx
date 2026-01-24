@@ -270,31 +270,13 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-tl from-indigo-400/30 via-violet-400/25 to-transparent animate-gradient-pulse" />
           </div>
 
-          {/* Layer 3: Large Floating Orbs with Advanced Blur */}
-          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gradient-to-br from-cyan-400/20 to-blue-500/10 dark:from-cyan-600/25 dark:to-blue-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[100px] animate-float-slow" />
-          <div className="absolute top-1/4 -right-40 w-[700px] h-[700px] bg-gradient-to-br from-purple-400/20 to-pink-500/10 dark:from-purple-600/25 dark:to-pink-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[120px] animate-float-slow" style={{ animationDelay: '3s', animationDuration: '25s' }} />
-          <div className="absolute -bottom-40 left-1/3 w-[650px] h-[650px] bg-gradient-to-br from-indigo-400/20 to-violet-500/10 dark:from-indigo-600/25 dark:to-violet-700/20 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[110px] animate-float-slow" style={{ animationDelay: '6s', animationDuration: '30s' }} />
-          <div className="absolute top-2/3 right-1/4 w-[550px] h-[550px] bg-gradient-to-br from-rose-400/15 to-orange-500/10 dark:from-rose-600/20 dark:to-orange-700/15 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[90px] animate-float-slow" style={{ animationDelay: '9s', animationDuration: '28s' }} />
+          {/* Layer 3: Large Floating Orbs with Advanced Blur - OPTIMIZED FOR LAG REDUCTION */}
+          <div className="absolute -top-40 -left-40 w-[400px] h-[400px] bg-sky-200/20 dark:bg-sky-500/10 rounded-full blur-[80px] animate-pulse-slow" />
+          <div className="absolute top-1/4 -right-40 w-[500px] h-[500px] bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '3s' }} />
+          <div className="absolute -bottom-40 left-1/3 w-[450px] h-[450px] bg-indigo-200/20 dark:bg-indigo-500/10 rounded-full blur-[90px] animate-pulse-slow" style={{ animationDelay: '6s' }} />
 
-          {/* Layer 4: Medium Floating Particles */}
-          <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-gradient-to-br from-blue-300/50 to-cyan-400/40 dark:from-blue-500/30 dark:to-cyan-600/25 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[60px] animate-float-bubble" />
-          <div className="absolute bottom-1/3 right-1/3 w-72 h-72 bg-gradient-to-br from-violet-300/50 to-purple-400/40 dark:from-violet-500/30 dark:to-purple-600/25 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[70px] animate-float-bubble" style={{ animationDelay: '2s' }} />
-          <div className="absolute top-1/2 right-1/2 w-56 h-56 bg-gradient-to-br from-pink-300/50 to-rose-400/40 dark:from-pink-500/30 dark:to-rose-600/25 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[50px] animate-float-bubble" style={{ animationDelay: '4s' }} />
-
-          {/* Layer 5: Small Accent Particles */}
-          <div className="absolute top-20 left-1/2 w-40 h-40 bg-gradient-to-br from-amber-300/60 to-yellow-400/50 dark:from-amber-500/35 dark:to-yellow-600/30 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[40px] animate-float-bubble" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-20 left-1/4 w-48 h-48 bg-gradient-to-br from-teal-300/60 to-emerald-400/50 dark:from-teal-500/35 dark:to-emerald-600/30 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[45px] animate-float-bubble" style={{ animationDelay: '3s' }} />
-          <div className="absolute top-40 right-1/4 w-44 h-44 bg-gradient-to-br from-fuchsia-300/60 to-purple-400/50 dark:from-fuchsia-500/35 dark:to-purple-600/30 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[42px] animate-float-bubble" style={{ animationDelay: '5s' }} />
-
-          {/* Layer 6: Animated Light Rays */}
-          <div className="absolute inset-0 opacity-30 dark:opacity-20">
-            <div className="absolute top-0 left-1/4 w-1 h-full bg-gradient-to-b from-transparent via-blue-400/40 to-transparent animate-light-ray" />
-            <div className="absolute top-0 left-1/2 w-1 h-full bg-gradient-to-b from-transparent via-purple-400/40 to-transparent animate-light-ray" style={{ animationDelay: '2s' }} />
-            <div className="absolute top-0 left-3/4 w-1 h-full bg-gradient-to-b from-transparent via-pink-400/40 to-transparent animate-light-ray" style={{ animationDelay: '4s' }} />
-          </div>
-
-          {/* Layer 7: Dynamic Grid Pattern with Glow */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#3b82f615_1px,transparent_1px),linear-gradient(to_bottom,#3b82f615_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#3b82f608_1px,transparent_1px),linear-gradient(to_bottom,#3b82f608_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_60%,transparent_100%)]" />
+          {/* Layer 7: Dynamic Grid Pattern with Glow - NO EXPENSIVE MASK */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#3b82f615_1px,transparent_1px),linear-gradient(to_bottom,#3b82f615_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#3b82f608_1px,transparent_1px),linear-gradient(to_bottom,#3b82f608_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-50" />
 
           {/* Layer 8: Radial Glow Spots */}
           <div className="absolute top-0 left-0 w-full h-full">

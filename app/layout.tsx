@@ -67,7 +67,7 @@ export default function RootLayout({
         </ThemeProvider>
         <Script
           src="https://docs.opencv.org/4.8.0/opencv.js"
-          strategy="beforeInteractive"
+          strategy="lazyOnload"
         />
       </body>
     </html>
