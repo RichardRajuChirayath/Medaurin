@@ -56,18 +56,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         try {
-            // NextAuth signOut
+            // 1. Clear Service Worker Cache first
+            if (typeof window !== "undefined" && "serviceWorker" in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_USER_DATA' });
+            }
+
+            // 2. Clear application caches manually
+            if ("caches" in window) {
+                const cacheNames = await caches.keys();
+                for (const cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                }
+            }
+
+            // 3. NextAuth signOut
             const { signOut } = await import("next-auth/react");
             await signOut({ redirect: false });
 
-            // Custom API logout
+            // 4. Custom API logout
             await fetch("/api/auth/logout", { method: "POST" });
 
             setUser(null);
-            router.push("/");
-            router.refresh();
+
+            // 5. Force reload to home to ensure fresh state
+            window.location.href = "/";
         } catch (error) {
             console.error("Logout error:", error);
+            window.location.href = "/";
         }
     };
 

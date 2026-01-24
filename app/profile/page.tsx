@@ -165,9 +165,28 @@ export default function ProfilePage() {
     const handleDeleteAccount = async () => {
         if (!confirm("Are you sure? This cannot be undone.")) return
         try {
+            // 1. Clear Service Worker Cache first
+            if (typeof window !== "undefined" && "serviceWorker" in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_USER_DATA' });
+            }
+
+            // 2. Clear application caches manually
+            if ("caches" in window) {
+                const cacheNames = await caches.keys();
+                for (const cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                }
+            }
+
+            // 3. Call Delete API
             await fetch("/api/profile", { method: "DELETE" })
-            router.push("/")
+
             toast.success("Account deleted")
+
+            // 4. Force reload to home
+            setTimeout(() => {
+                window.location.href = "/"
+            }, 1000)
         } catch (e) {
             toast.error("Failed to delete account")
         }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
     const config = `
-// Medaurin Unified Service Worker
+// Medaurin Unified Service Worker - ULTRA-SECURE SESSION V3
 // Handles: Offline Caching + Firebase Push Notifications
 
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
@@ -31,7 +31,7 @@ try {
             icon: '/logo.png',
             badge: '/logo.png',
             tag: 'medication-reminder',
-            data: payload.data
+            data: payload.data || { url: '/medications' }
         };
 
         return self.registration.showNotification(notificationTitle, notificationOptions);
@@ -40,12 +40,9 @@ try {
     console.error('[SW] Firebase background init failed', e);
 }
 
-// 2. Offline Caching & PWA Logic
-const CACHE_NAME = 'medaurin-pwa-v1';
+// 2. Secure Caching Strategy
+const CACHE_NAME = 'medaurin-secure-v3';
 const ASSETS_TO_CACHE = [
-    '/',
-    '/medications',
-    '/profile',
     '/logo.png'
 ];
 
@@ -73,26 +70,57 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
+// Cache Clearing Logic for Logout
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'CLEAR_USER_DATA') {
+        console.log('[SW] FORCED User Cache Purge triggered.');
+        event.waitUntil(
+            caches.delete(CACHE_NAME).then(() => caches.open(CACHE_NAME))
+        );
+    }
+});
+
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     if (!event.request.url.startsWith(self.location.origin)) return;
 
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) return cachedResponse;
+    const url = event.request.url;
 
-            return fetch(event.request).then((response) => {
-                if (!response || response.status !== 200 || response.type !== 'basic') {
-                    return response;
-                }
-                const responseToCache = response.clone();
+    // NEVER CACHE THESE ROUTES - STRICT SECURITY
+    if (url.includes('/api/') || 
+        url.includes('/auth') || 
+        url.includes('/signin') ||
+        url.includes('/_next/data/')) {
+        return; 
+    }
+
+    // Network-First for everything else
+    event.respondWith(
+        fetch(event.request).then((networkResponse) => {
+            // If the network says we are unauthorized, clear the cache immediately
+            if (networkResponse.status === 401 || networkResponse.status === 403) {
+                console.log('[SW] Privacy Protection: Clearing cache due to 401/403');
+                caches.delete(CACHE_NAME);
+                return networkResponse;
+            }
+
+            // Cache successful page navigations for offline use
+            if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+                const responseToCache = networkResponse.clone();
                 caches.open(CACHE_NAME).then((cache) => {
                     cache.put(event.request, responseToCache);
                 });
-                return response;
-            }).catch(() => {
-                // If offline and request fails, we can either return a cached asset or null
-                return caches.match('/');
+            }
+            return networkResponse;
+        }).catch(() => {
+            // If completely offline, use cache
+            return caches.match(event.request).then((cachedResponse) => {
+                if (cachedResponse) return cachedResponse;
+                // Offline fallback
+                if (event.request.mode === 'navigate') {
+                    return caches.match('/');
+                }
+                return null;
             });
         })
     );
