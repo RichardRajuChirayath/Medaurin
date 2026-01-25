@@ -9,6 +9,7 @@ import { SymptomChecker } from "@/components/symptom-checker"
 import { BotProtection } from "@/components/bot-protection"
 import { AuthButton } from "@/components/auth-button"
 import { useAuth } from "@/components/auth-provider"
+import { WeatherHealthShield } from "@/components/weather-health-shield"
 
 import { WelcomeModal } from "@/components/welcome-modal"
 import { TypingAnimation } from "@/components/typing-animation"
@@ -526,6 +527,13 @@ export default function Home() {
             </div>
           )}
         </div>
+
+        {/* NEW: Weather Health Shield - Premium Safety Section */}
+        {user && !result && (
+          <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 animate-slide-up">
+            <WeatherHealthShield />
+          </div>
+        )}
 
 
         {/* Premium Footer */}
