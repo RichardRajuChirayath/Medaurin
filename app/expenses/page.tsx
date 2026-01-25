@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import {
     DollarSign, Plus, Calendar, TrendingUp, TrendingDown,
     Pill, Store, ChevronLeft, Trash2, Receipt, BarChart3,
-    Download, MapPin, Mail, FileUp, Settings
+    Download, MapPin, Mail, FileUp, Settings, AlertTriangle, CheckCircle, Info
 } from "lucide-react"
 import { format } from "date-fns"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -394,10 +394,22 @@ export default function ExpenseTrackerPage() {
                                                             <Pill className="w-5 h-5 text-primary" />
                                                         </div>
                                                         <div className="flex-1">
-                                                            <h4 className="font-heading font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                                                                {expense.medicineName}
-                                                            </h4>
-                                                            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <h4 className="font-heading font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                                                                    {expense.medicineName}
+                                                                </h4>
+                                                                {expense.isBanned && (
+                                                                    <Badge variant="destructive" className="animate-pulse bg-red-600 hover:bg-red-700">
+                                                                        BANNED
+                                                                    </Badge>
+                                                                )}
+                                                                {expense.isOverpriced && (
+                                                                    <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
+                                                                        PRICING ALERT
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
                                                                 {expense.quantity && <span>{expense.quantity}</span>}
                                                                 {expense.pharmacyName && (
                                                                     <>
@@ -411,6 +423,36 @@ export default function ExpenseTrackerPage() {
                                                                 <span>•</span>
                                                                 <span>{format(new Date(expense.purchaseDate), "MMM d, yyyy")}</span>
                                                             </div>
+
+                                                            {/* Government Verification Alerts */}
+                                                            {expense.verificationAlerts && expense.verificationAlerts.length > 0 && (
+                                                                <div className="mt-3 space-y-1.5">
+                                                                    {expense.verificationAlerts.map((alert, idx) => {
+                                                                        const isCritical = alert.includes("BANNED") || alert.includes("CRITICAL");
+                                                                        const isWarning = alert.includes("overcharged") || alert.includes("Price");
+                                                                        return (
+                                                                            <div
+                                                                                key={idx}
+                                                                                className={`flex items-start gap-2 p-2 rounded-lg text-xs font-semibold ${isCritical
+                                                                                    ? "bg-red-50 text-red-700 border border-red-200"
+                                                                                    : isWarning
+                                                                                        ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                                                                        : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                                                                    }`}
+                                                                            >
+                                                                                {isCritical ? (
+                                                                                    <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                                                                                ) : isWarning ? (
+                                                                                    <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                                                                                ) : (
+                                                                                    <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                                                                                )}
+                                                                                {alert}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start gap-4">
