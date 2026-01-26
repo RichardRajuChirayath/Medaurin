@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertCircle, CheckCircle2, AlertTriangle, Pill, ArrowRight, TrendingUp, Shield, Info, Download } from "lucide-react"
+import { AlertCircle, CheckCircle2, AlertTriangle, Pill, ArrowRight, TrendingUp, Shield, Info } from "lucide-react"
 import { InteractionList } from "./interaction-list"
 import { FDAInfoSection } from "./fda-info-section"
 
@@ -44,7 +44,6 @@ interface ResultProps {
 export function ResultCard(props: { result: ResultProps; analysisType: "photo" | "manual" }) {
   const { status, score, medicines, interactions, recommendations, medicineDetails, unknownMedicines = [], doubleDosingWarnings = [], healthWarnings = [] } = props.result
   const { analysisType } = props
-  const [isDownloading, setIsDownloading] = useState(false)
 
   // Frontend Filter: Ensure we NEVER display unknown medicines in the main list
   // even if the backend accidentally returned them in the main array
@@ -52,54 +51,6 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
     (m) => !unknownMedicines.includes(m)
   );
 
-  const handleDownload = async () => {
-    setIsDownloading(true)
-    try {
-      console.log('Starting PDF generation...')
-      console.log('Sending data:', props.result)
-
-      const response = await fetch("/api/generate-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(props.result),
-      });
-
-      console.log('PDF API Response status:', response.status)
-      console.log('PDF API Response headers:', Object.fromEntries(response.headers.entries()))
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("PDF generation failed:", errorData);
-        throw new Error(errorData.details || errorData.error || "Failed to generate PDF");
-      }
-
-      const blob = await response.blob();
-      console.log('PDF blob created, size:', blob.size, 'bytes')
-      console.log('PDF blob type:', blob.type)
-
-      if (blob.size === 0) {
-        throw new Error('Generated PDF is empty');
-      }
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "medicine-interaction-report.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      console.log('PDF download triggered successfully')
-    } catch (error) {
-      console.error("Download error:", error);
-      alert(`Failed to download PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsDownloading(false)
-    }
-  }
 
   const statusConfig = {
     safe: {
@@ -260,27 +211,6 @@ export function ResultCard(props: { result: ResultProps; analysisType: "photo" |
               </p>
             </div>
 
-            {/* Download Button */}
-            <div className="mt-6 md:mt-0">
-
-              <button
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className="group flex items-center justify-center gap-3 px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-indigo-500/50"
-              >
-                {isDownloading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Generating...</span>
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-5 h-5" />
-                    <span>Download Report</span>
-                  </>
-                )}
-              </button>
-            </div>
           </div>
 
           {/* Risk Score */}
