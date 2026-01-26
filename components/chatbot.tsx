@@ -39,7 +39,7 @@ const QA_DATABASE: QAItem[] = [
     // Drug Interaction Checker
     {
         question: "How does drug interaction checking work?",
-        answer: "Our **AI-powered system** analyzes your medicines using:\\n\\n• **3 Medical Databases** - FDA, NIH, RxNorm\\n• **Advanced OCR** - Read medicine names from photos\\n• **6-Factor Risk Scoring** - Comprehensive safety assessment\\n\\nGet results in seconds with detailed PDF reports!",
+        answer: "Our **AI-powered system** analyzes your medicines using:\\n\\n• **3 Medical Databases** - FDA, NIH, RxNorm\\n• **Advanced OCR** - Read medicine names from photos\\n• **6-Factor Risk Scoring** - Comprehensive safety assessment \\n\\nGet results in seconds with detailed analysis!",
         category: "Drug Interaction",
         keywords: ["work", "interaction", "check", "safety"]
     },
@@ -60,7 +60,7 @@ const QA_DATABASE: QAItem[] = [
     // Medicine Expense Tracker
     {
         question: "What is the Medicine Expense Tracker?",
-        answer: "A **comprehensive expense management system** for your medicines:\\n\\n💊 **Track all medicine purchases**\\n📊 **Monthly insights & analytics**\\n🧾 **OCR bill scanning** (auto-extract from photos)\\n📧 **Email invoice import** (IMAP integration)\\n🗺️ **Pharmacy finder** (OpenStreetMap)\\n📥 **Export reports** (PDF/Excel/CSV)\\n🔔 **Budget alerts** (FCM notifications)",
+        answer: "A **comprehensive expense management system** for your medicines:\\n\\n💊 **Track all medicine purchases**\\n📊 **Monthly insights & analytics**\\n🧾 **OCR bill scanning** (auto-extract from photos)\\n📧 **Email invoice import** (IMAP integration)\\n🗺️ **Pharmacy finder** (OpenStreetMap)\\n📥 **Export data** (Excel/CSV)\\n🔔 **Budget alerts** (FCM notifications)",
         category: "Expense Tracker",
         keywords: ["expense", "tracker", "bill", "cost", "money", "spending"]
     },
@@ -106,7 +106,7 @@ const QA_DATABASE: QAItem[] = [
     },
     {
         question: "Can I export my expense data?",
-        answer: "**YES!** Export in **3 formats**:\\n\\n📄 **PDF** - Professional report with company logo\\n📊 **Excel (.xlsx)** - Full spreadsheet with all fields\\n📋 **CSV** - Import into other apps\\n\\nOne-click download. All data included. Perfect for tax/reimbursement!",
+        answer: "**YES!** Export in **3 formats**:\\n\\n📊 **Excel (.xlsx)** - Full spreadsheet with all fields\\n📋 **CSV** - Import into other apps\\n\\nOne-click download. All data included. Perfect for tax/reimbursement!",
         category: "Analytics",
         keywords: ["export", "download", "pdf", "excel", "csv", "report"]
     },
@@ -219,7 +219,7 @@ export function Chatbot({ context }: ChatbotProps) {
 
     useEffect(() => {
         if (isOpen && messages.length === 0) {
-            let greetingText = "👋 **Welcome to Medaurin Assistant!**\\n\\nI'm here to help you with:\\n\\n💊 Drug Interactions\\n💰 Expense Tracking\\n📊 Analytics & Reports"
+            let greetingText = "👋 **Welcome to Medaurin Assistant!**\\n\\nI'm here to help you with:\\n\\n💊 Drug Interactions\\n💰 Expense Tracking\\n📊 Analytics & Checking"
 
             if (context) {
                 greetingText += "\\n\\n**I see your analysis results. Ask me anything!**"
@@ -283,7 +283,7 @@ export function Chatbot({ context }: ChatbotProps) {
                 },
                 {
                     question: "What should I do next?",
-                    answer: "**Recommended Actions:**\\n\\n1. Review detailed report above\\n2. Download PDF for records\\n3. Consult healthcare provider if Caution/Danger status\\n4. Track expenses in Expense Tracker tab",
+                    answer: "**Recommended Actions:**\\n\\n1. Review detailed results above\\n2. Consult healthcare provider if Caution/Danger status\\n3. Track expenses in Expense Tracker tab",
                     category: "About Your Results"
                 }
             ]

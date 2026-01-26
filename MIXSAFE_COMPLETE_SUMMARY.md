@@ -29,7 +29,6 @@ MixSafe is the **ONLY app in India** offering:
 - ✅ **Advanced OCR** - Tesseract.js for medicine photo scanning
 - ✅ **Voice Input** - Offline Whisper AI speech recognition
 - ✅ **6-Factor Risk Scoring** - Comprehensive safety assessment
-- ✅ **PDF Reports** - Download detailed analysis
 - ✅ **Text-to-Speech** - Listen to results
 
 #### **Risk Levels:**
@@ -43,7 +42,7 @@ MixSafe is the **ONLY app in India** offering:
 - RxNorm Normalization
 - Tesseract.js OCR
 - Whisper AI (offline)
-- jsPDF for reports
+- Lucide Icons for UI
 
 ---
 
@@ -56,7 +55,7 @@ MixSafe is the **ONLY app in India** offering:
 ✅ **Pharmacy Finder** - OpenStreetMap integration  
 ✅ **Budget Alerts** - FCM notifications at 80%/100%  
 ✅ **Analytics Dashboard** - Charts & insights  
-✅ **Export Reports** - PDF/Excel/CSV  
+✅ **Export Data** - Excel/CSV  
 
 #### **OCR Technology:**
 - Browser-based Tesseract.js
@@ -85,7 +84,6 @@ MixSafe is the **ONLY app in India** offering:
 - Visualized with Recharts
 
 #### **Export Formats:**
-- 📄 **PDF** - Professional report
 - 📊 **Excel** - Full spreadsheet
 - 📋 **CSV** - Import anywhere
 
