@@ -23,7 +23,7 @@
 ---
 
 ## 🚀 Vision
-Medaurin is not just another medicine tracker; it's a **proactive health shield**. In a world where drug-drug interactions and misinformation cause thousands of fatalities yearly, Medaurin provides an intelligent, clinical-grade validation engine directly in the pocket of every user. Built with a focus on **Indian healthcare transparency** and **elderly accessibility**.
+Medaurin is not just another medicine tracker; it's a **proactive health shield**. In a world where drug-drug interactions and misinformation cause thousands of fatalities yearly, Medaurin provides an intelligent, clinical-grade validation engine directly in the pocket of every user. Built with a focus on **healthcare transparency** and **elderly accessibility**.
 
 ---
 
@@ -61,7 +61,7 @@ A proprietary scoring algorithm that assesses safety across six critical vectors
 - **Environmental Sensitivities**: Real-time alerts based on **OpenWeatherMap** (e.g., UV sensitivity for Doxycycline).
 - **Disease Contraindications**: Cross-referencing user health profile with clinical contraindicated lists.
 - **Double Dosing Shield**: Real-time tracking of medication logs to prevent accidental overdose.
-- **India-Specific Verification**: Real-time matching against **CDSCO** (Banned lists) and **NPPA** (Price caps).
+- **Regional Compliance Verification**: Real-time matching against **CDSCO** (Banned lists) and **NPPA** (Price caps) for enhanced safety and financial protection.
 
 ### 3. Offline-First Architecture
 Medaurin is resilient. Many of its core safety features work even without a stable internet connection:
@@ -119,8 +119,8 @@ graph TD
 
 ## � Smart Financial Management
 
-Medaurin tackles the "hidden costs" of healthcare in India:
-- **NPPA Price Shield**: Auto-detects if a pharmacy is overcharging above the government ceiling price.
+Medaurin tackles the "hidden costs" of healthcare:
+- **Price Transparency**: Auto-detects if a pharmacy is overcharging above the government ceiling price.
 - **Pharmacy Finder**: Locates nearby pharmacies using **OpenStreetMap** with integrated navigation.
 - **Email Invoice Import**: Seamlessly syncs pharmacy bills from Gmail/Outlook using secure IMAP integration.
 - **Budget Intelligence**: Analytics dashboard with categorical spending insights and forecast alerts.
@@ -139,14 +139,14 @@ Medaurin is heavily documented for both developers and end-users:
 - [🚀 Quick Start Guide](./START_HERE.md)
 - [📱 Android Setup](./CAPACITOR_ANDROID_SETUP.md)
 - [🏛️ Architecture Guide](./ARCHITECTURE_GUIDE.md)
-- [🇮🇳 India Verification Docs](./INDIA_VERIFICATION_FEATURE.md)
+- [✅ Regional Verification Docs](./REGIONAL_VERIFICATION_FEATURE.md)
 
 ---
 
 <p align="center">
-  <strong>Built with ❤️ in India for a safer tomorrow.</strong>
+  <strong>Built with ❤️ for a safer tomorrow.</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Made%20in-🇮🇳%20India-FF9933?style=for-the-badge" alt="Made in India"/>
+  <img src="https://img.shields.io/badge/Made%20with-❤️-FF9933?style=for-the-badge" alt="Made with love"/>
 </p>
