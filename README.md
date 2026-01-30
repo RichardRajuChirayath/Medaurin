@@ -134,14 +134,9 @@ Medaurin tackles the "hidden costs" of healthcare:
 
 ---
 
-## � Documentation & Guides
-Medaurin is heavily documented for both developers and end-users:
-- [🚀 Quick Start Guide](./START_HERE.md)
-- [📱 Android Setup](./CAPACITOR_ANDROID_SETUP.md)
-- [🏛️ Architecture Guide](./ARCHITECTURE_GUIDE.md)
-- [✅ Regional Verification Docs](./REGIONAL_VERIFICATION_FEATURE.md)
 
----
+
+
 
 <p align="center">
   <strong>Built with ❤️ for a safer tomorrow.</strong>
